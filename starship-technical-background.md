@@ -19,7 +19,7 @@ Stellt euch Starship als eine Klasse mit 1000 Zeilen vor: Station, Schiffe, Rege
 Die Antwort auf alle fünf hat einen Namen: `Separation of Concerns`.  
 Und das Gegenteil hat auch einen: `Big Ball of Mud`.
 
-<img src="_assets/starship/technical_big_ball_of_mud.jpg" alt="Big Ball of Mud: You reach for the banana, and get the entire gorilla" width="500" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/technical_big_ball_of_mud.jpg" alt="Big Ball of Mud: You reach for the banana, and get the entire gorilla" width="500" style="margin-left: 100px; margin-top: 16px">
 
 ## 2. Separation of Concerns
 
@@ -30,7 +30,7 @@ Und das Gegenteil hat auch einen: `Big Ball of Mud`.
 - **Klasse**: hat *eine* Verantwortung. `SpaceStation` verwaltet Crews and Ships, `Logbook` sammelt Einträge.
 - **Layer**: hat *eine* Concern. `Domain` modelliert die Regeln, `App` erzählt die Story auf der Konsole, `Tests` prüfen die Regeln.
 
-<img src="_assets/starship/technical_lego_separation_of_concerns.png" alt="Separation of Concerns: Legosteine" width="300" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/technical_lego_separation_of_concerns.png" alt="Separation of Concerns: Legosteine" width="300" style="margin-left: 100px; margin-top: 16px">
 
 <sub style="margin-left: 100px; margin-top: 16px">Quelle: Hayim Makabee, Separation of Concerns, effectivesoftwaredesign.com, 2012</sub>
 
@@ -41,7 +41,7 @@ Jede Ebene zieht eine Grenze. Ob die Grenze gut gezogen ist, misst man mit zwei 
 - **Cohesion**: Wie sehr gehört zusammen, was in einer Klasse oder Schicht steckt. Hoch ist gut. `Logbook` macht nur Logbuch.
 - **Coupling**: Wie viele andere Teile kennt ein Teil. Niedrig ist gut. `Domain` kennt niemanden, `App` kennt nur `Domain`.
 
-<img src="_assets/starship/technical_cohesion_coupling.png" alt="Cohesion und Coupling" width="560" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/technical_cohesion_coupling.png" alt="Cohesion und Coupling" width="560" style="margin-left: 100px; margin-top: 16px">
 
 ## 4. Benefits of Good Architecture (Design)
 
@@ -59,7 +59,7 @@ Drei Schichten, drei Projekte, eine Solution.
 - **App Layer** (`StarShip.App`): `Program.cs`, erzählt die Story auf der Konsole. Benutzt die Domäne.
 - **Test Layer** (`StarShip.Tests`): prüft die Regeln der Domäne direkt, ohne Konsole.
 
-<img src="_assets/starship/technical_layers.png" alt="Schichten" width="480" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/technical_layers.png" alt="Schichten" width="480" style="margin-left: 100px; margin-top: 16px">
 
 ## 6. C# Projekte und Solution
 
@@ -75,7 +75,7 @@ Projekte in einer Solution:
 - **Unit Test Project** (`StarShip.Tests`): ein Projekt, das xUnit kennt. Jede Methode mit `[Fact]` ist ein Test, den Rider und `dotnet test` finden und ausführen.
 - **Dependency Rule**: App und Tests referenzieren Domain, Domain referenziert nichts. So wird die Dependency Rule zum Compilerfehler, wenn jemand sie bricht.
 
-<img src="_assets/starship/setup_08_folders.png" alt="Solution" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_08_folders.png" alt="Solution" width="640" style="margin-left: 100px; margin-top: 16px">
 
 ---
 

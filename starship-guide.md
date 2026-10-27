@@ -1,4 +1,4 @@
-![Starship](_assets/starship/akt_0_intro.png)
+![Starship](_assets/akt_0_intro.png)
 
 # Starship: eine Rettungsmission in fünf Akten
 
@@ -46,44 +46,44 @@ Die Tastenkürzel stehen für Mac, Windows in Klammern: `⌘` ist `Ctrl`, `⌥` 
 
 1. `File > New Solution…`, Typ **Empty Solution**, Name `StarShip`, Häkchen **Create Git repository**.
 
-<img src="_assets/starship/setup_01_new_solution.png" alt="New Solution" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_01_new_solution.png" alt="New Solution" width="640" style="margin-left: 100px; margin-top: 16px">
 
 2. Rider hat eine `.gitignore` angelegt, sie sagt Git, was nicht ins Repo gehört: `bin/`, `obj/` und drei Rider Einträge.
    Drei Zeilen fehlen noch, hängt sie an: `.idea/` (Rider Einstellungen), `*.DotSettings.user` (persönliche Rider Einstellungen zur Solution) und `.DS_Store` (Mac Finder).
 
-<img src="_assets/starship/setup_02_gitignore.png" alt="gitignore" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_02_gitignore.png" alt="gitignore" width="640" style="margin-left: 100px; margin-top: 16px">
 
 3. `⌘K` (Windows `Ctrl+K`), erster Commit: `chore: initial commit`.
 
-<img src="_assets/starship/setup_03_initial_commit.png" alt="Initial Commit" width="400" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_03_initial_commit.png" alt="Initial Commit" width="400" style="margin-left: 100px; margin-top: 16px">
 
 4. Rechtsklick auf die Solution, `Add > New Project…`, **Class Library** `StarShip.Domain`, Framework `net10.0`.
 
-<img src="_assets/starship/setup_04_add_classlib.png" alt="Class Library" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_04_add_classlib.png" alt="Class Library" width="640" style="margin-left: 100px; margin-top: 16px">
 
 5. Dasselbe mit **Console Application** `StarShip.App`.
 
-<img src="_assets/starship/setup_05_add_console.png" alt="Console" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_05_add_console.png" alt="Console" width="640" style="margin-left: 100px; margin-top: 16px">
 
 6. Dasselbe mit **Unit Test Project** `StarShip.Tests`, Framework xUnit.
 
-<img src="_assets/starship/setup_06_add_xunit.png" alt="xUnit" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_06_add_xunit.png" alt="xUnit" width="640" style="margin-left: 100px; margin-top: 16px">
 
 7. Rechtsklick `StarShip.App`, `Add > Reference…`, Häkchen bei `StarShip.Domain`. Dasselbe für `StarShip.Tests`.
    Erst mit der Referenz kann ein Projekt die Klassen des anderen benutzen: `using StarShip.Domain.Models;` in `Program.cs` und in den Tests.
    App und Tests kennen die Domäne, die Domäne kennt niemanden.
 
-<img src="_assets/starship/setup_07a_add_reference_menu.png" alt="Add Reference Menü App" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_07a_add_reference_menu.png" alt="Add Reference Menü App" width="640" style="margin-left: 100px; margin-top: 16px">
 
-<img src="_assets/starship/setup_07_add_reference.png" alt="Reference App" width="400" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_07_add_reference.png" alt="Reference App" width="400" style="margin-left: 100px; margin-top: 16px">
 
-<img src="_assets/starship/setup_07b_add_reference_tests_menu.png" alt="Add Reference Menü Tests" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_07b_add_reference_tests_menu.png" alt="Add Reference Menü Tests" width="640" style="margin-left: 100px; margin-top: 16px">
 
-<img src="_assets/starship/setup_07c_add_reference_tests.png" alt="Reference Tests" width="400" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_07c_add_reference_tests.png" alt="Reference Tests" width="400" style="margin-left: 100px; margin-top: 16px">
 
 8. Aufräumen: `Class1.cs` und `UnitTest1.cs` löschen, Ordner anlegen wie im Baum unten.
 
-<img src="_assets/starship/setup_08_folders.png" alt="Ordner" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_08_folders.png" alt="Ordner" width="640" style="margin-left: 100px; margin-top: 16px">
 
 ```text
 StarShip/
@@ -100,17 +100,17 @@ StarShip/
 9. In `StarShip.Domain.csproj` in der `PropertyGroup` ergänzen: `<WarningsAsErrors>nullable</WarningsAsErrors>`.
    Damit meldet der Compiler jede mögliche `null` Referenz als Fehler, nicht nur als Warnung.
 
-<img src="_assets/starship/setup_09_csproj.png" alt="csproj" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_09_csproj.png" alt="csproj" width="640" style="margin-left: 100px; margin-top: 16px">
 
 10. `⌘K` (Windows `Ctrl+K`), zweiter Commit: `chore: add solution with domain, app and test projects`.
 
-<img src="_assets/starship/setup_10_commit.png" alt="Commit" width="520" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/setup_10_commit.png" alt="Commit" width="520" style="margin-left: 100px; margin-top: 16px">
 
 > 💡 Namespaces: `StarShip.Domain.Models`, `StarShip.Domain.Models.Shared`, `StarShip.Domain.Exceptions`, `StarShip.Domain.Queries`.
 
 ### 0.2 Domain Model
 
-![Domänenmodell](_assets/starship/akt_0_domain_model.png)
+![Domänenmodell](_assets/akt_0_domain_model.png)
 
 ### 0.3 Shared
 
@@ -121,7 +121,7 @@ Shared Types sind Records und Enums, die meistens zwei oder mehr Entities gemein
 Ein Enum ist eine feste Auswahl mit Namen. Andere Werte gibt es nicht, `CrewRole.Captain` ja, eine erfundene Rolle nein.
 Rechtsklick auf `Models/Shared`, `Add > New Class/Interface…`, Typ **Enum**.
 
-<img src="_assets/starship/akt_0_01_new_enum.png" alt="Neues Enum" width="560" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/akt_0_01_new_enum.png" alt="Neues Enum" width="560" style="margin-left: 100px; margin-top: 16px">
 
 ```csharp
 public enum CrewRole { Captain, Pilot, Engineer, Medic }
@@ -143,7 +143,7 @@ Ein Record ist ein Typ, der nur aus Werten besteht und sich nie ändert. Zwei Re
 
 Dasselbe Popup, Typ **Record**.
 
-<img src="_assets/starship/akt_0_02_new_record.png" alt="Neuer Record" width="560" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/akt_0_02_new_record.png" alt="Neuer Record" width="560" style="margin-left: 100px; margin-top: 16px">
 
 ```csharp
 public record Coordinate(int X, int Y);
@@ -242,7 +242,7 @@ Eine Entity hat eine Id und ein Leben lang Geschichte. Sie liegen in `Models`, j
 Was Station und Schiffe gemeinsam haben. Id, Name, Ort, Baudatum, Logbuch.
 Rechtsklick auf `Models`, `Add > New Class/Interface…`, Typ **Class**. So entstehen alle Entities.
 
-<img src="_assets/starship/akt_0_03_new_class.png" alt="Neue Klasse" width="560" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/akt_0_03_new_class.png" alt="Neue Klasse" width="560" style="margin-left: 100px; margin-top: 16px">
 
 📖 Nachlesen: [Abschnitte einer Klasse](starship-technical-background.md#7-abschnitte-einer-klasse), [Properties](starship-technical-background.md#10-properties), [Auto Properties](starship-technical-background.md#21-auto-properties), [Queries](starship-technical-background.md#11-computed-properties-queries)
 
@@ -558,11 +558,11 @@ public class SpaceStation : BaseEntity
 - Alle Typen sind angelegt, `dotnet build` läuft ohne Fehler.
 - `git commit -m "feat: domain model with properties and constructors"`
 
-<img src="_assets/starship/akt_0_04_commit.png" alt="Commit" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/akt_0_04_commit.png" alt="Commit" width="640" style="margin-left: 100px; margin-top: 16px">
 
 ---
 
-![Akt 1](_assets/starship/akt_1_build.png)
+![Akt 1](_assets/akt_1_build.png)
 
 ## Akt 1: Die Docks öffnen
 
@@ -662,11 +662,11 @@ public class SpaceStationTests
 
 Tests laufen in Rider mit Rechtsklick auf `StarShip.Tests`, `Run Unit Tests`. Beide müssen grün sein.
 
-<img src="_assets/starship/akt_1_01_run_tests.png" alt="Tests in Rider" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/akt_1_01_run_tests.png" alt="Tests in Rider" width="640" style="margin-left: 100px; margin-top: 16px">
 
 Oder im Terminal mit `dotnet test`, so läuft es später auch auf einem Build Server.
 
-<img src="_assets/starship/akt_1_02_dotnet_test.png" alt="dotnet test" width="640" style="margin-left: 100px; margin-top: 16px">
+<img src="_assets/akt_1_02_dotnet_test.png" alt="dotnet test" width="640" style="margin-left: 100px; margin-top: 16px">
 
 #### 1.3 SpaceStation: Supply
 
