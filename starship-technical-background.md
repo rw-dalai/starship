@@ -161,7 +161,7 @@ public Logbook Logbook { get; }           // entsteht im Konstruktor, kein Objec
 ```
 
 - **Kein public set**: bei uns gibt es keine Property, die von außen geschrieben wird. Zustand ändert sich nur über Businessmethoden.
-- **Keine Prüfung in der Property**: eine Property hat keinen Guard und keine Regel. Prüfen passiert im Konstruktor und in Businessmethoden, warum steht in 14.
+- **Keine Prüfung in der Property**: eine Property hat keinen Guard und keine Regel. Prüfen passiert im Konstruktor und in Businessmethoden, warum steht in 15.
 - **Die Frage**: nie ändern heißt `init`, ändern heißt `private set`, im Konstruktor erzeugt und nie ersetzt heißt `get`.
 
 ## 11. Computed Properties (Queries)
@@ -201,7 +201,29 @@ public CrewMember(string name, CrewRole role)
 - **Helfer**: `ThrowIfNull`, `ThrowIfNullOrWhiteSpace`, `ThrowIfNegativeOrZero`, `ThrowIfGreaterThan`. Sie werfen die passende `ArgumentException` und nennen den Parameter selbst.
 - **protected**: `BaseEntity` und `BaseShip` haben einen `protected` Konstruktor, nur die Kindklassen rufen ihn.
 
-## 13. Business Methods
+## 13. Invariants
+
+Eine Invariante ist eine Regel, die für ein Objekt immer gilt. Nicht nur beim Erzeugen, sondern nach jeder Methode. Ein Schiff, das sie bricht, gibt es nicht.
+
+```csharp
+// --- Fields ---
+
+private readonly List<CrewMember> _crew = [];          // Invariante: höchstens MaxCrew, niemand doppelt
+
+// --- Props ---
+
+public int Fuel { get; private set; }                  // Invariante: 0 bis MaxFuel
+public DistressSignal? Distress { get; private set; }  // Invariante: nur im All, nie angedockt
+public SpaceStation? Station { get; private set; }     // Invariante: gesetzt genau dann, wenn Station.Ships das Schiff enthält
+```
+
+- **Constructor**: setzt den Anfangszustand. Die Guards prüfen die Parameter, danach gilt die Invariante zum ersten Mal.
+- **Business Methods**: führen von einem gültigen Zustand in den nächsten. Die Business Rule prüft vorher, die Logik ändert, danach gilt die Invariante wieder. `private set` sperrt jeden anderen Weg.
+- **Tests**: jeder Negativtest versucht, eine Invariante zu brechen. `AddFuel_ShouldThrow_WhenWarpCoreWouldOverflow`.
+
+Manche Invariante schützt man, indem man die Methode weglässt: Das Logbuch kennt `Add` und `Append`, aber kein `Remove`.
+
+## 14. Business Methods
 
 Jede Businessmethode hat meistens drei Abschnitte: Guard, Business Rule und Business Logic. Bei uns noch der Audit Log, damit man später weiß, was in der Software passiert ist.
 
@@ -227,8 +249,7 @@ public void AddCrew(CrewMember member)
 - **Business Logic**: Die eigentliche Arbeit, eine Zeile oder mehrere. Erst hier ändert sich der Zustand.
 - **Audit Log**: Ein Eintrag ins Logbuch, damit man später weiß, was in der Software passiert ist.
 
-
-## 14. Business Methods: Warum kein public Setter
+## 15. Business Methods: Warum kein public Setter
 
 Deshalb gibt es keinen public Setter und keine Prüfung in der Property: Ein Setter sieht nur den neuen Wert, eine Businessmethode sieht die ganze Situation.
 
@@ -241,7 +262,7 @@ ds9.Refuel(xhosa);      // Businessmethode: Guard, Regeln, Logik und Logbuch an 
 - **Ein Ort**: die Regel „nur im Dock tanken" steht in `Refuel`, nicht verteilt auf Setter und Aufrufer.
 - **Logbuch**: ein Setter loggt nichts. Jede Änderung über eine Methode hinterlässt eine Spur.
 
-## 15. Business Methods: Guards und Rules
+## 16. Business Methods: Guards und Rules
 
 Ein Guard prüft den Parameter, eine Business Rule prüft die Situation. Zwei Prüfungen, zwei Exceptions, zwei Schuldige.
 
@@ -271,7 +292,7 @@ Rules.Require(ShipCount < MaxDocks, "Kein Pylon frei.");    // so schreiben wir 
 
 - **Rules.Require**: ist die Bedingung falsch, wirft es die `StarshipException` mit der Meldung.
 
-## 16. Helpers
+## 17. Helpers
 
 Ein Helper macht eine Businessmethode kürzer und ist von außen unsichtbar.
 
@@ -287,7 +308,7 @@ private Coordinate NextPosition(Coordinate target)
 
 - **private**: niemand außerhalb der Klasse ruft einen Helper.
 
-## 17. Entity und Value Object
+## 18. Entity und Value Object
 
 Alles in Shared ist ein Value Object, Station und Schiffe sind Entities.
 
@@ -300,7 +321,7 @@ public class CargoShip : BaseShip { ... }        // Entity
 - **Value Object**: nur Werte, keine `Id`, unveränderlich. Zwei mit gleichen Werten sind gleich. Immer ein `record`.
 - **Entity**: hat eine `Id` und einen Lebenslauf. Sie ändert sich über Businessmethoden, bleibt aber dasselbe Ding. Immer eine `class`.
 
-## 18. Beziehungen: Richtung und Anzahl
+## 19. Beziehungen: Richtung und Anzahl
 
 Jede Beziehung hat eine Anzahl und eine Navigationsrichtung. Beides entscheidet ihr beim Modell, nicht beim Programmieren.
 
@@ -319,7 +340,7 @@ public IReadOnlyList<CrewMember> Crew => ...;         // BaseShip -> CrewMember:
 - **Uni**: Navigation in eine Richtung, nur eine Seite verweist auf die andere.
 - **Bi**: Navigation in beide Richtungen, beide Seiten verweisen aufeinander, nur wenn der Rückweg gebraucht wird.
 
-## 19. Beziehungen pflegen: der Parent setzt beide Seiten
+## 20. Beziehungen pflegen: der Parent setzt beide Seiten
 
 Bei einer Beziehung gibt es einen Parent und ein Child. Der Parent ist der fachliche Owner, das Child gehört zu ihm: ein Logbuch zu seiner Entity, ein Schiff zu seiner Station.  
 Der Parent setzt die Beziehung, bei uni eine Seite, bei bi beide, in einer Methode und in fester Reihenfolge.
@@ -340,7 +361,7 @@ public void Dock(BaseShip ship)  // 1:n in SpaceStation
 - **Komposition**: Das Child entsteht im Konstruktor des Parents. `Logbook = new Logbook(this)`, einmal, nie getauscht.
 - **Aggregation**: Das Child kommt und geht über Methoden. `Dock` setzt `Station`, `Undock` setzt `null`, deshalb nullable.
 
-## 20. Tests
+## 21. Tests
 
 Jeder Test heißt `Sut_ShouldXxx_WhenXxx`: Was wird getestet, was soll passieren, unter welcher Bedingung.
 
@@ -399,7 +420,7 @@ public void Dock_ShouldThrow_WhenShipIsAlreadyDocked()                 // Negati
 
 Jedes Kapitel zeigt zuerst **Vorher** (so kennt ihr es) und dann **Nachher** (so schreiben wir es).
 
-## 21. Auto Properties
+## 22. Auto Properties
 
 Der Compiler schreibt das Backing Field, ihr schreibt nur das Wort, das sagt, wer schreiben darf und wann.
 
@@ -432,7 +453,7 @@ var xhosa = new CargoShip("Xhosa", home, 100) { BuiltAt = new DateOnly(2360, 5, 
 - **Konstruktor**: alles, was aus einem Parameter kommt oder geprüft wird. Eine `{ get; }` Property kann nur hier gesetzt werden.
 - **Object Initializer**: `{ BuiltAt = ... }` direkt hinter `new` überschreibt den direkten Wert. Geht nur bei `init` und `set`, danach ist `init` für immer zu. Was sich später ändert, hat `private set` und wird nur in Businessmethoden gesetzt.
 
-## 22. Records
+## 23. Records
 
 Ein Typ, der nur aus Werten besteht, braucht Konstruktor, Gleichheit und `ToString`. Das sind 12 Zeilen, die immer gleich aussehen.
 
@@ -474,7 +495,7 @@ public record CrewMember                                      // Record mit eige
 - **Positional Record**: Props und Konstruktor aus der Klammer. Nehmt ihn, wenn es nichts zu prüfen gibt.
 - **Eigener Konstruktor**: sobald ein Wert geprüft oder getrimmt wird. `CrewMember`, `DistressSignal`.
 
-## 23. Equality
+## 24. Equality
 
 Wann sind zwei Objekte gleich? Ein Record nach seinen Werten, eine Entity nach ihrer Id. Ohne eure Hilfe vergleicht C# nur die Adresse im Speicher.
 
@@ -511,7 +532,7 @@ _ships.Contains(b);                                          // true, Dock lehnt
 - **Entity**: gleicher Typ und gleiche `Id`. Zwei Frachter namens Xhosa sind zwei Schiffe. `Equals(BaseEntity?)` ist die typsichere Fassung, `Equals(object?)` leitet dorthin weiter.
 - **GetHashCode**: wer `Equals` überschreibt, muss auch den Hash überschreiben, sonst verhalten sich `HashSet` und `Dictionary` falsch. Der Hash darf sich nie ändern, deshalb ist `Id` `init`.
 
-## 24. Equality: Operator Overloading
+## 25. Equality: Operator Overloading
 
 `Equals` ist überschrieben, aber `a == b` sagt immer noch „nicht gleich". Für `==` und `!=` muss die Klasse die Operatoren selbst festlegen.
 
@@ -537,7 +558,7 @@ new Coordinate(3, 4) == new Coordinate(3, 4);                // true, beim Recor
 - **null**: beide müssen `null` auf beiden Seiten vertragen, deshalb die Prüfung mit `is null` vor `Equals`.
 - **Record**: bekommt `==` und `!=` geschenkt, genau wie `Equals`. Nur eine Klasse muss sie selbst schreiben.
 
-## 25. Primary Constructor
+## 26. Primary Constructor
 
 Ein Konstruktor, der nur weiterreicht, ist drei Zeilen für nichts. Seit C# 12 dürfen die Parameter direkt am Klassennamen stehen.
 
@@ -560,7 +581,7 @@ public class StarshipException(string message) : Exception(message);   // Primar
 - **Kein Platz für Guards**: ein Primary Constructor hat keinen Rumpf. Prüfen und Trimmen geht nicht, `BaseEntity` und `CargoShip` brauchen deshalb den ausgeschriebenen Konstruktor.
 - **Wo er passt**: überall, wo nur weitergereicht wird. Bei uns nur `StarshipException`. `SpaceStation` und `RescueShip` könnten ihn auch, behalten aber die lange Form, damit alle Entities gleich aussehen.
 
-## 26. Pattern Matching
+## 27. Pattern Matching
 
 Typ prüfen und dann casten, zwei Bedingungen mit `&&` verknüpfen, `!= null` schreiben: Das geht in einer Frage mit `is`.
 
@@ -583,7 +604,7 @@ if (xhosa.Distress is not null)                 // null-Pattern
 - **Property Pattern**: prüft Properties in geschweiften Klammern, mehrere mit Komma.
 - **Relationales Pattern**: `<`, `<=`, `>`, `>=` gegen einen konstanten Wert. Deshalb muss `MaxFuel` eine `const` sein.
 
-## 27. Von `if` zur Switch Expression
+## 28. Von `if` zur Switch Expression
 
 Eine Methode mit drei `return`, nur um einen Wert auszuwählen. Das geht als ein Ausdruck.
 
@@ -615,9 +636,9 @@ public ShipStatus Status => this switch                              // Switch E
 
 - **Expression**: liefert einen Wert, deshalb passt sie hinter `=>` in eine Query.
 - **Reihenfolge**: die erste passende Zeile gewinnt. Das Wichtigste steht oben, `_` fängt den Rest.
-- **this switch**: das Objekt selbst wird gegen die Patterns aus Kapitel 26 geprüft.
+- **this switch**: das Objekt selbst wird gegen die Patterns aus Kapitel 27 geprüft.
 
-## 28. Extension Methods
+## 29. Extension Methods
 
 Eine Frage an die ganze Flotte gehört zu keiner Entity. Sie landet in einer statischen Hilfsklasse, und der Aufruf liest sich wie ein Werkzeug, nicht wie eine Frage an die Liste.
 
@@ -647,7 +668,7 @@ var inSpace = fleet.InSpace();                // die Liste steht links vom Punkt
 - **static**: Klasse und Methode müssen `static` sein, und `Program.cs` braucht `using StarShip.Domain.Queries;`.
 - **LINQ**: `Where`, `Count` und `MinBy` sind genau so gebaut, Extension Methods auf `IEnumerable<T>`. Deshalb lassen sie sich verketten: `fleet.InSpace().Select(s => s.Name)`.
 
-## 29. `virtual`, `override` und `base`
+## 30. `virtual`, `override` und `base`
 
 Eine Basisklasse gibt ein Verhalten vor, das ein Kind ändern darf. Drei Wörter: `virtual` erlaubt es, `override` macht es, `base` nutzt das Original.
 
@@ -680,7 +701,7 @@ public override IEnumerable<BaseShip> Scan(IEnumerable<BaseShip> ships) =>
 - **override**: steht im Kind, gleiche Signatur, ersetzt die Fassung der Basis. Wer ein `BaseShip` in der Hand hat und `Report()` ruft, bekommt trotzdem die Fassung des Frachters.
 - **base**: ruft die Fassung der Basis aus dem Kind heraus. `CargoShip` hängt an, `RescueShip` filtert.
 
-## 30. Nullable
+## 31. Nullable
 
 `xhosa.Station.Name` läuft durch den Compiler und crasht im All, wenn das Schiff gerade nicht angedockt ist.
 
@@ -710,7 +731,7 @@ var station = Station ?? throw new StarshipException($"{Name} ist nicht angedock
 - **Fehler statt Warnung**: `WarningsAsErrors` macht aus jeder möglichen `NullReferenceException` einen Build-Fehler.
 - **`?.` und `?? throw`**: `?.` greift nur zu, wenn nicht `null`. `?? throw` holt den Wert oder wirft, danach ist der Wert sicher nicht `null`.
 
-## 31. Strings
+## 32. Strings
 
 Text mit `+` zusammenkleben, `\n` für Zeilen und `PadRight` für Spalten: Das liest niemand gern.
 
@@ -739,7 +760,7 @@ $"""
 - **Linksbündig**: `{"Status",-12}` füllt rechts mit Leerzeichen auf 12 Zeichen auf, `Status      `. Das Minus heißt links, so entstehen die Spalten im Report.
 - **Rechtsbündig**: `{Fuel,3}` füllt links auf, `  7`. Ohne Minus heißt rechts, so stehen Zahlen untereinander. `{SentAt:HH:mm:ss}` formatiert eine Zeit.
 
-## 32. Factory Method
+## 33. Factory Method
 
 Ein Konstruktor mit einem Enum-Parameter liest sich schlecht und lässt sich leicht vertippen. Eine statische Methode mit sprechendem Namen nimmt die Entscheidung ab.
 
