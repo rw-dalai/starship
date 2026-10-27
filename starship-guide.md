@@ -677,7 +677,7 @@ Oder im Terminal mit `dotnet test`, so läuft es später auch auf einem Build Se
 eine Lieferung von null oder weniger ist ein Programmierfehler und kein Geschäftsfall. Nach der Lieferung steht im Logbuch, wie viel angekommen ist.
 `FuelPool` hat `private set`, von außen ändert ihn nur diese Methode.
 
-📖 Nachlesen: [Business Methods: private set](starship-technical-background.md#14-business-methods-private-set)
+📖 Nachlesen: [Warum kein public Setter](starship-technical-background.md#14-business-methods-warum-kein-public-setter)
 
 ```csharp
 public void Supply(int amount)

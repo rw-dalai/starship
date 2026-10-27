@@ -152,17 +152,17 @@ public IReadOnlyList<CrewMember> Crew => _crew.AsReadOnly();     // Computed Pro
 
 ## 10. Properties
 
-Eine Property ist ein gespeicherter Wert, den man von außen lesen darf. Wer ihn ändern darf, steht dahinter.
+Eine Property speichert einen Wert. Von außen darf man ihn lesen, nie schreiben. Welche Form sie hat, entscheidet eine Frage: Ändert sich der Wert nach dem Erzeugen?
 
 ```csharp
-public Logbook Logbook { get; }
-public string Name { get; init; }
-public int Fuel { get; private set; }
+public string Name { get; init; }         // ändert sich nie: init
+public int Fuel { get; private set; }     // ändert sich durch eine Businessmethode: private set
+public Logbook Logbook { get; }           // entsteht im Konstruktor, kein Object Initializer: get
 ```
 
-- **get**: Nur der Konstruktor setzt es. Danach nie wieder.
-- **init**: Einmal gesetzt, per Konstruktor oder Object Initializer. Danach nie wieder.
-- **private set**: Nur eine Methode der Klasse ändert den Wert.
+- **Kein public set**: bei uns gibt es keine Property, die von außen geschrieben wird. Zustand ändert sich nur über Businessmethoden.
+- **Keine Prüfung in der Property**: eine Property hat keinen Guard und keine Regel. Prüfen passiert im Konstruktor und in Businessmethoden, warum steht in 14.
+- **Die Frage**: nie ändern heißt `init`, ändern heißt `private set`, im Konstruktor erzeugt und nie ersetzt heißt `get`.
 
 ## 11. Computed Properties (Queries)
 
@@ -228,18 +228,18 @@ public void AddCrew(CrewMember member)
 - **Audit Log**: Ein Eintrag ins Logbuch, damit man später weiß, was in der Software passiert ist.
 
 
-## 14. Business Methods: private set
+## 14. Business Methods: Warum kein public Setter
 
-Jeder Wert, der sich ändert, hat `private set`. Nur die Klasse selbst darf ihn ändern, und das nur in einer Businessmethode mit Guard, Regel und Logbuch.
+Deshalb gibt es keinen public Setter und keine Prüfung in der Property: Ein Setter sieht nur den neuen Wert, eine Businessmethode sieht die ganze Situation.
 
 ```csharp
-public int Fuel { get; private set; }   // von außen nur lesen, schreiben darf nur die Klasse selbst
-
-xhosa.Fuel = 10;                        // so nicht: geht nicht einmal durch den Compiler
-ds9.Refuel(xhosa);                      // so schon: Name, Regeln und Logbuch in einer Methode
+xhosa.Fuel = 10;        // Setter: wer prüft, ob die Xhosa angedockt ist, ob der Pool reicht, wer schreibt ins Logbuch?
+ds9.Refuel(xhosa);      // Businessmethode: Guard, Regeln, Logik und Logbuch an einer Stelle
 ```
 
-- **private set**: Von außen nur lesen. Schreiben darf nur die Klasse selbst, und bei uns nur eine Businessmethode.
+- **Kontext**: `Refuel` kennt Station, Pool und Schiff. Ein Setter auf `Fuel` kennt nur `value`.
+- **Ein Ort**: die Regel „nur im Dock tanken" steht in `Refuel`, nicht verteilt auf Setter und Aufrufer.
+- **Logbuch**: ein Setter loggt nichts. Jede Änderung über eine Methode hinterlässt eine Spur.
 
 ## 15. Business Methods: Guards und Rules
 
@@ -399,19 +399,21 @@ Jedes Kapitel zeigt zuerst **Vorher** (so kennt ihr es) und dann **Nachher** (so
 
 ## 21. Auto Properties
 
-Der Compiler schreibt das Backing Field, ihr schreibt nur noch, wer den Wert setzen darf.
+Der Compiler schreibt das Backing Field, ihr schreibt nur das Wort, das sagt, wer schreiben darf und wann.
 
 ```csharp
-public int Fuel { get; set; }                     // jeder darf setzen, gibt es bei uns nicht
-public int Fuel { get; private set; }             // nur die Klasse selbst
-public string Name { get; init; }                 // nur beim Erzeugen
-public Logbook Logbook { get; }                   // nur der Konstruktor
-public int CrewCount => _crew.Count;              // berechnet, kein Speicher
+public int Fuel { get; set; }              // jeder, jederzeit
+public int Fuel { get; private set; }      // nur die Klasse, jederzeit
+public string Name { get; init; }          // jeder, aber nur beim Erzeugen
+public Logbook Logbook { get; }            // nur der Konstruktor
+public int CrewCount => _crew.Count;       // niemand, wird berechnet
 ```
 
-- **set, private set, init, get**: von jeder darf zu niemand darf. Je weiter unten, desto sicherer.
-- **init gegen get**: `init` erlaubt `new CargoShip(...) { BuiltAt = ... }`, `get` allein nicht.
-- **Property gegen Query**: `{ get; }` speichert einen Wert, `=>` rechnet ihn bei jedem Zugriff aus.
+- **get; set**: jeder darf schreiben, auch von außen. Gibt es bei uns nicht, kommt später bei DTOs im Web-Teil.
+- **get; private set**: nur Methoden derselben Klasse schreiben, dafür jederzeit. `Fuel`, `Cargo`, `Position`.
+- **get; init**: jeder darf schreiben, aber nur im Konstruktor oder im Object Initializer direkt hinter `new`. Danach ist zu. `Name`, `Id`, `BuiltAt`.
+- **get**: nur der Konstruktor, nicht einmal der Object Initializer. `Logbook`, `Owner`.
+- **=>**: kein Backing Field, kein Speicher, bei jedem Zugriff berechnet. `CrewCount`, `Status`.
 
 Und wer setzt den Wert wann? Es gibt vier Stellen, und jede Property hat genau eine davon.
 
