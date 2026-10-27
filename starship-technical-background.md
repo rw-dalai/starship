@@ -302,7 +302,7 @@ public class CargoShip : BaseShip { ... }        // Entity
 
 ## 18. Beziehungen: Richtung und Anzahl
 
-Jede Beziehung hat eine Anzahl und eine Richtung. Beides entscheidet ihr beim Modell, nicht beim Programmieren.
+Jede Beziehung hat eine Anzahl und eine Navigationsrichtung. Beides entscheidet ihr beim Modell, nicht beim Programmieren.
 
 ```csharp
 public Logbook Logbook { get; }                       // BaseEntity -> Logbook: 1:1, bidirektional
@@ -314,13 +314,15 @@ public SpaceStation? Station { get; private set; }    // BaseShip -> SpaceStatio
 public IReadOnlyList<CrewMember> Crew => ...;         // BaseShip -> CrewMember: 1:n, unidirektional
 ```
 
-- **1:1 oder 1:n**: ein Verweis oder eine Liste. Ein Schiff hat ein Logbuch, eine Station hat viele Schiffe.
-- **Uni oder bi**: unidirektional kennt nur der Parent den Child, ein `CrewMember` weiß nicht, auf welchem Schiff es sitzt. Bidirektional nur, wenn die Story den Rückweg braucht: `Launch` fragt `Station`, `Format` fragt `Owner.Name`.
-- **Parent und Child**: Parent ist, wer besitzt und die Liste hält. Komposition (gefüllte Raute): der Child lebt nur mit dem Parent, `Logbook`. Aggregation (leere Raute): der Child lebt auch allein, `BaseShip`, deshalb ist `Station` nullable.
+- **1:1**: zu einem Objekt gehört genau ein anderes, im Code ein Verweis. Ein Schiff hat genau ein Logbuch.
+- **1:n**: zu einem Objekt gehören viele andere, im Code eine Liste. Eine Station hat viele Schiffe.
+- **Uni**: Navigation in eine Richtung, nur eine Seite verweist auf die andere.
+- **Bi**: Navigation in beide Richtungen, beide Seiten verweisen aufeinander, nur wenn der Rückweg gebraucht wird.
 
 ## 19. Beziehungen pflegen: der Parent setzt beide Seiten
 
-Bidirektional heißt zwei Verweise, die immer zusammenpassen müssen. Der fachliche Owner, der Parent, setzt beide Seiten in einer Methode, in fester Reihenfolge.
+Bei einer Beziehung gibt es einen Parent und ein Child. Der Parent ist der fachliche Owner, das Child gehört zu ihm: ein Logbuch zu seiner Entity, ein Schiff zu seiner Station.  
+Der Parent setzt die Beziehung, bei uni eine Seite, bei bi beide, in einer Methode und in fester Reihenfolge.
 
 ```csharp
 Logbook = new Logbook(this);     // 1:1 in BaseEntity: einmal im Konstruktor, nie wieder
