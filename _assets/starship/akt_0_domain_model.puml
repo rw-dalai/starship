@@ -1,0 +1,258 @@
+@startuml
+hide empty methods
+skinparam classAttributeIconSize 0
+
+' ---------------- Legend ----------------
+legend right
+|= Zeichen |= Bedeutung |= C# |
+| <<Entity>> | hat eine Id, ändert sich | class |
+| <<Record>> | nur Werte, unveränderlich | record |
+| <<Owned>> | gehört einem Parent, keine eigene Id | class |
+| Constants | für alle gleich | const, static readonly |
+| Props | gespeichert | Property |
+| {readOnly} | einmal gesetzt, nie geändert | { get; } oder { get; init; } |
+| ohne Angabe | nur Businessmethoden ändern | { get; private set; } |
+| Computed, /Name | berechnet | => ... |
+| + / - / # | public / private / protected | |
+| Ctor | Konstruktor, prüft seine Parameter mit Guards | |
+| Raute gefüllt | Komposition, Child lebt nur mit Parent | Logbook |
+| Raute leer | Aggregation, Child lebt auch allein | BaseShip |
+| Name am Ende | Rolle, so heißt die Property der anderen Seite | owner, logbook |
+| <<nn>> | Not null | |
+endlegend
+
+package "Shared" as P_Shared #EEF6FF {
+
+  together {
+    class Coordinate << (R,#CCEEFF) Record >> {
+      +X: int
+      +Y: int
+    }
+
+    class CrewMember << (R,#CCEEFF) Record >> {
+      +Name: string <<nn>>
+      +Role: CrewRole <<nn>>
+    }
+
+    class LogEntry << (R,#CCEEFF) Record >> {
+      +At: DateTime <<nn>>
+      +Type: LogType <<nn>>
+      +Actor: string <<nn>>
+      +Message: string <<nn>>
+    }
+
+    class DistressSignal << (R,#CCEEFF) Record >> {
+      +Reason: string <<nn>>
+      +SentAt: DateTime <<nn>>
+    }
+  }
+
+  together {
+    enum CrewRole {
+      Captain
+      Pilot
+      Engineer
+      Medic
+    }
+
+    enum ShipStatus {
+      Docked
+      InSpace
+      Distress
+    }
+
+    enum Readiness {
+      Ready
+      NeedsFuel
+      NeedsCrew
+    }
+
+    enum LogType {
+      Docking
+      Warp
+      Crew
+      Fuel
+      Cargo
+      Distress
+      Rescue
+    }
+  }
+
+  Coordinate -[hidden]down- CrewRole
+  CrewMember -[hidden]down- ShipStatus
+  LogEntry -[hidden]down- Readiness
+  DistressSignal -[hidden]down- LogType
+}
+
+package "BaseEntity" as P_Entity #F5F5F5 {
+  abstract class BaseEntity <<Entity>> {
+    -- Props --
+    +Id: Guid <<nn>> {readOnly}
+    +BuiltAt: DateOnly <<nn>> {readOnly}
+    +Logbook: Logbook <<nn>> {readOnly}
+    +Name: string <<nn>> {readOnly}
+    +Position: Coordinate <<nn>>
+    -- Ctor --
+    #BaseEntity(name: string, position: Coordinate)
+  }
+}
+
+package "Logbook" as P_Log #FFF5E6 {
+  class Logbook <<Owned>> {
+    -- Props --
+    +Owner: BaseEntity <<nn>> {readOnly}
+    +Entries: IReadOnlyList<LogEntry>
+    -- Computed --
+    +/Count: int
+    +/First: LogEntry?
+    +/Last: LogEntry?
+    -- Queries --
+    +ByType(type: LogType): IReadOnlyList<LogEntry>
+    +LastOf(type: LogType): LogEntry?
+    +CountByType(): IReadOnlyList<LogTypeCount>
+    -- Ctor --
+    +Logbook(owner: BaseEntity)
+  }
+}
+
+package "Ships" as P_Ships #EAF8EA {
+
+  abstract class BaseShip <<Entity>> {
+    -- Constants --
+    +{static} MaxFuel: int = 10
+    +{static} MaxCrew: int = 6
+    +{static} WarpRange: int = 15
+    +{static} SensorRange: int = 20
+    +{static} FuelPerWarp: int = 1
+    -- Props --
+    +RequiredRoles: IReadOnlyDictionary<CrewRole, int> {readOnly}
+    +Fuel: int
+    +Distress: DistressSignal?
+    +Station: SpaceStation?
+    +Crew: IReadOnlyList<CrewMember>
+    -- Computed --
+    +/CrewCount: int
+    +/HasRequiredRoles: bool
+    +/IsDocked: bool
+    +/Status: ShipStatus
+    +/Readiness: Readiness
+    -- Ctor --
+    #BaseShip(name: string, position: Coordinate,
+    \t requiredRoles: IReadOnlyDictionary<CrewRole, int>)
+  }
+
+  class CargoShip <<Entity>> {
+    -- Constants --
+    -{static} Roles = Captain 1, Pilot 1
+    -- Props --
+    +MaxCargo: int <<nn>> {readOnly}
+    +Cargo: int
+    -- Computed --
+    +/IsFull: bool
+    +/CargoPercent: int
+    -- Ctor --
+    +CargoShip(name: string, position: Coordinate, maxCargo: int)
+  }
+
+  class RescueShip <<Entity>> {
+    -- Constants --
+    -{static} Roles = Captain 1, Pilot 1, Medic 1
+    -- Ctor --
+    +RescueShip(name: string, position: Coordinate)
+  }
+
+  CargoShip -up-|> BaseShip
+  RescueShip -up-|> BaseShip
+  BaseShip -up-|> BaseEntity
+}
+
+package "SpaceStation" as P_Station #E6F3FF {
+  class SpaceStation <<Entity>> {
+    -- Constants --
+    +{static} MaxDocks: int = 10
+    -- Props --
+    +FuelPool: int
+    +Ships: IReadOnlyList<BaseShip>
+    +CrewPool: IReadOnlyList<CrewMember>
+    -- Computed --
+    +/ShipCount: int
+    +/CrewCount: int
+    -- Queries --
+    +CrewCountByRole(role: CrewRole): int
+    +CrewNames(): IReadOnlyList<string>
+    +AllShipsReady(): bool
+    +AnyShipReady(): bool
+    +ShipCountByType(): IReadOnlyList<TypeCount>
+    +CrewCountPerRole(): IReadOnlyList<RoleCount>
+    -- Ctor --
+    +SpaceStation(name: string, position: Coordinate)
+  }
+  SpaceStation -up-|> BaseEntity
+}
+
+package "Queries" as P_Queries #F3EEFF {
+  class ShipQueries <<static>> {
+    -- Queries, Extension Methods auf IEnumerable<BaseShip> --
+    +{static} AnyInDistress(): bool
+    +{static} InDistress(): IReadOnlyList<BaseShip>
+    +{static} InSpace(): IReadOnlyList<BaseShip>
+    +{static} AnyInSpace(): bool
+    +{static} AllDocked(): bool
+    +{static} ReadyToLaunch(): IReadOnlyList<string>
+    +{static} TotalCargo(): int
+    +{static} Oldest(): BaseShip?
+    +{static} Newest(): BaseShip?
+    +{static} WithLargestCrew(): BaseShip?
+    +{static} Nearest(origin: Coordinate): BaseShip?
+    +{static} Farthest(origin: Coordinate): BaseShip?
+    +{static} WithinRange(origin: Coordinate, range: int): IReadOnlyList<BaseShip>
+    +{static} DistressReports(): IReadOnlyList<DistressReport>
+    +{static} TotalFuelByType(): IReadOnlyList<FuelByType>
+    +{static} PerBuildYear(): IReadOnlyList<YearCount>
+  }
+
+  together {
+    class RoleCount << (R,#CCEEFF) Record >> {
+      +Role: CrewRole
+      +Count: int
+    }
+
+    class TypeCount << (R,#CCEEFF) Record >> {
+      +Type: string
+      +Count: int
+    }
+
+    class LogTypeCount << (R,#CCEEFF) Record >> {
+      +Type: LogType
+      +Count: int
+    }
+  }
+
+  together {
+    class FuelByType << (R,#CCEEFF) Record >> {
+      +Type: string
+      +Fuel: int
+    }
+
+    class YearCount << (R,#CCEEFF) Record >> {
+      +Year: int
+      +Count: int
+    }
+
+    class DistressReport << (R,#CCEEFF) Record >> {
+      +Name: string
+      +Reason: string
+      +SentAt: DateTime
+    }
+  }
+
+  RoleCount -[hidden]down- FuelByType
+  TypeCount -[hidden]down- YearCount
+  LogTypeCount -[hidden]down- DistressReport
+}
+
+BaseEntity "1 owner" *-- "1 logbook" Logbook : owns >
+' 1:n bidirektional, Aggregation: ein Schiff existiert auch ohne Station. Dock und Undock pflegen beide Seiten
+SpaceStation "0..1 station" o-- "0..* ships" BaseShip : docks >
+
+@enduml
