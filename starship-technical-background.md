@@ -511,7 +511,7 @@ _ships.Contains(b);                                          // true, Dock lehnt
 - **Entity**: gleicher Typ und gleiche `Id`. Zwei Frachter namens Xhosa sind zwei Schiffe. `Equals(BaseEntity?)` ist die typsichere Fassung, `Equals(object?)` leitet dorthin weiter.
 - **GetHashCode**: wer `Equals` überschreibt, muss auch den Hash überschreiben, sonst verhalten sich `HashSet` und `Dictionary` falsch. Der Hash darf sich nie ändern, deshalb ist `Id` `init`.
 
-## 24. Operator Overloading
+## 24. Equality: Operator Overloading
 
 `Equals` ist überschrieben, aber `a == b` sagt immer noch „nicht gleich". Für `==` und `!=` muss die Klasse die Operatoren selbst festlegen.
 

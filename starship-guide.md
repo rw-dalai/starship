@@ -324,7 +324,7 @@ public abstract class BaseEntity : IEquatable<BaseEntity>
 ```
 
 - Zwei Entities sind gleich, wenn sie denselben Typ und dieselbe `Id` haben. Das braucht die Station, wenn sie prüft, ob ein Schiff schon an einem Pylon hängt.
-- 📖 Nachlesen: [Equality](starship-technical-background.md#23-equality), [Operator Overloading](starship-technical-background.md#24-operator-overloading)
+- 📖 Nachlesen: [Equality](starship-technical-background.md#23-equality), [Equality: Operator Overloading](starship-technical-background.md#24-equality-operator-overloading)
 
 #### Logbook
 
