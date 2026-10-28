@@ -61,7 +61,11 @@ Drei Schichten, drei Projekte, eine Solution.
 
 <img src="_assets/technical_layers.png" alt="Schichten" width="480" style="margin-left: 100px; margin-top: 16px">
 
-## 6. C# Projekte und Solution
+---
+
+# Teil B: .NET Projekte
+
+## 6. Struktur: Solution und Projekte
 
 In .NET ist jede Schicht ein eigenes Projekt, und alle Projekte zusammen bilden eine Solution. So wird Separation of Concerns sichtbar: eine Zuständigkeit, ein Projekt.
 
@@ -77,11 +81,76 @@ Projekte in einer Solution:
 
 <img src="_assets/setup_08_folders.png" alt="Solution" width="640" style="margin-left: 100px; margin-top: 16px">
 
+## 7. Dateien: csproj, bin und obj
+
+Ein Projekt ist ein Ordner. Drei Dinge darin hat man nicht selbst geschrieben:
+
+- **csproj**: die Projektdatei, siehe unten. Nur sie und der Code gehören ins Repo.
+- **obj/**: Zwischenergebnisse von Restore und Build. Darf man jederzeit löschen, der nächste Build legt sie neu an.
+- **bin/**: das fertige Programm, eine `.dll` je Projekt, bei der App dazu der Starter. Das startet `dotnet run`.
+
+`bin/` und `obj/` stehen in der `.gitignore`, jeder Rechner baut sie sich selbst.
+
+<img src="_assets/technical_csproj.png" alt="csproj im File System" width="800" style="margin-left: 100px; margin-top: 16px">
+
+**Die csproj Datei**
+
+Sie ist kurz, weil das SDK die Standardwerte kennt. Hier die der App:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\StarShip.Domain\StarShip.Domain.csproj" />
+    </ItemGroup>
+
+</Project>
+```
+
+- **Sdk**: das Regelwerk für den Build. Nimmt jede `.cs` Datei im Ordner, legt `bin/` und `obj/` an, kennt die Standardwerte.
+- **OutputType**: `Exe` baut ein startbares Programm aus `Program.cs`. Ohne die Zeile entsteht eine `.dll`, eine Bibliothek. Domain und Tests sind Bibliotheken.
+- **TargetFramework**: die .NET Version. Wer das Programm startet, braucht die .NET 10 Runtime, älter geht nicht, neuer springt nicht automatisch ein.
+- **ImplicitUsings**: `System`, `System.Linq` und Co sind in jeder Datei da, ohne `using` Zeile.
+- **Nullable**: der Compiler unterscheidet `string` und `string?` und warnt bei jedem `?` ohne Prüfung. In der Domain macht `WarningsAsErrors` daraus einen Fehler.
+- **ProjectReference**: die Referenz aus Schritt 7. Die Domain wird zuerst gebaut, ihre `.dll` landet in `bin/` der App. Nie in der Domain.
+- **PackageReference**: ein NuGet Paket, etwa `xunit` im Testprojekt. Kommt beim Restore aus dem Internet in einen Cache am Rechner.
+
+## 8. Lifecycle: die dotnet Befehle
+
+Rider ruft diese Befehle über seine Knöpfe. Im Terminal (`⌥F12`, Windows `Alt+F12`) tippt man sie selbst.
+
+**Täglich**
+
+<table width="1400">
+<tr><th width="760" align="left">Befehl</th><th width="640" align="left">Was passiert</th></tr>
+<tr><td><code>dotnet build</code></td><td>Restore, dann kompilieren, Ergebnis in <code>bin/</code></td></tr>
+<tr><td><code>dotnet run --project StarShip.App</code></td><td>Build, dann die App starten</td></tr>
+<tr><td><code>dotnet test</code></td><td>Build, dann alle Tests laufen lassen</td></tr>
+<tr><td><code>dotnet test --filter SpaceStationTests</code></td><td>nur die Tests einer Klasse</td></tr>
+<tr><td><code>dotnet test --filter AddCrew_ShouldThrow_WhenMemberIsAlreadyInPool</code></td><td>nur ein Test. Der Filter sucht im vollen Namen, ein Teil davon reicht</td></tr>
+</table>
+
+**Wenn nichts mehr geht**, in dieser Reihenfolge:
+
+<table width="1400">
+<tr><th width="760" align="left">Befehle</th><th width="640" align="left">Was passiert</th></tr>
+<tr><td><code>dotnet clean</code><br><code>dotnet build</code></td><td><code>bin/</code> und <code>obj/</code> leeren, neu bauen</td></tr>
+<tr><td><code>dotnet clean</code><br><code>dotnet nuget locals all --clear</code><br><code>dotnet restore --force</code><br><code>dotnet build --no-incremental</code></td><td>Pakete aus dem Cache werfen, neu holen, alles neu bauen</td></tr>
+<tr><td>Rider <code>File &gt; Invalidate Caches…</code><br>Rider neu starten</td><td>baut das Terminal, aber Rider zeigt Fehler, liegt es an Rider</td></tr>
+</table>
+
 ---
 
-# Teil B: Class Design
+# Teil C: Class Design
 
-## 7. Abschnitte einer Klasse
+## 9. Abschnitte einer Klasse
 
 Jede Klasse ist gleich aufgebaut, Abschnitte ohne Inhalt lasst ihr weg.
 
@@ -121,7 +190,7 @@ public class SpaceStation : BaseEntity
 - **Equality**: sagt, wann zwei Objekte gleich sind. Nur in `BaseEntity`.
 - **Helpers**: private Hilfsmethoden, die eine Businessmethode lesbar machen.
 
-## 8. Constants
+## 10. Constants
 
 Eine Konstante ist ein fixer Wert, der für die ganze Klasse (und alle Instanzen) gilt.
 
@@ -135,7 +204,7 @@ private static readonly IReadOnlyDictionary<CrewRole, int> Roles =
 - **const**: ein fixer Wert, der für die ganze Klasse gilt (z.B. `int`, `double`, `string`).
 - **static readonly**: ein fixes Objekt, das für die ganze Klasse gilt (z.B. `List`, `Dictionary`)
 
-## 9. Backing Fields
+## 11. Backing Fields
 
 Ein Backing Field ist ein privater Speicher, auf den ein Property oder Computed Property zugreift.
 
@@ -150,7 +219,7 @@ public IReadOnlyList<CrewMember> Crew => _crew.AsReadOnly();     // Computed Pro
 
 - **readonly**: die Referenz ist nach dem Konstruktor fix. Der Inhalt der Liste darf sich trotzdem ändern.
 
-## 10. Properties
+## 12. Properties
 
 Eine Property speichert einen Wert. Von außen darf man ihn lesen, nie schreiben. Welche Form sie hat, entscheidet eine Frage: Ändert sich der Wert nach dem Erzeugen?
 
@@ -164,7 +233,7 @@ public Logbook Logbook { get; }           // entsteht im Konstruktor, kein Objec
 - **Keine Prüfung in der Property**: eine Property hat keinen Guard und keine Regel. Prüfen passiert im Konstruktor und in Businessmethoden, warum steht in 15.
 - **Die Frage**: nie ändern heißt `init`, ändern heißt `private set`, im Konstruktor erzeugt und nie ersetzt heißt `get`.
 
-## 11. Computed Properties (Queries)
+## 13. Computed Properties (Queries)
 
 Was sich aus anderen Werten ausrechnen lässt, wird nie gespeichert.
 
@@ -174,7 +243,7 @@ public bool IsDocked => Station is not null;
 public IReadOnlyList<CrewMember> Crew => _crew.AsReadOnly();
 ```
 
-## 12. Constructor
+## 14. Constructor
 
 Der Konstruktor prüft nur seine Parameter, eine Zeile je Prüfung.
 
@@ -201,7 +270,7 @@ public CrewMember(string name, CrewRole role)
 - **Helfer**: `ThrowIfNull`, `ThrowIfNullOrWhiteSpace`, `ThrowIfNegativeOrZero`, `ThrowIfGreaterThan`. Sie werfen die passende `ArgumentException` und nennen den Parameter selbst.
 - **protected**: `BaseEntity` und `BaseShip` haben einen `protected` Konstruktor, nur die Kindklassen rufen ihn.
 
-## 13. Invariants
+## 15. Invariants
 
 Eine Invariante ist eine Regel, die für ein Objekt immer gilt. Nicht nur beim Erzeugen, sondern nach jeder Methode. Ein Schiff, das sie bricht, gibt es nicht.
 
@@ -223,7 +292,7 @@ public SpaceStation? Station { get; private set; }     // Invariante: gesetzt ge
 
 Manche Invariante schützt man, indem man die Methode weglässt: Das Logbuch kennt `Add` und `Append`, aber kein `Remove`.
 
-## 14. Business Methods
+## 16. Business Methods
 
 Jede Businessmethode hat meistens drei Abschnitte: Guard, Business Rule und Business Logic. Bei uns noch der Audit Log, damit man später weiß, was in der Software passiert ist.
 
@@ -249,7 +318,7 @@ public void AddCrew(CrewMember member)
 - **Business Logic**: Die eigentliche Arbeit, eine Zeile oder mehrere. Erst hier ändert sich der Zustand.
 - **Audit Log**: Ein Eintrag ins Logbuch, damit man später weiß, was in der Software passiert ist.
 
-## 15. Business Methods: Warum kein public Setter
+## 17. Business Methods: Warum kein public Setter
 
 Deshalb gibt es keinen public Setter und keine Prüfung in der Property: Ein Setter sieht nur den neuen Wert, eine Businessmethode sieht die ganze Situation.
 
@@ -262,7 +331,7 @@ ds9.Refuel(xhosa);      // Businessmethode: Guard, Regeln, Logik und Logbuch an 
 - **Ein Ort**: die Regel „nur im Dock tanken" steht in `Refuel`, nicht verteilt auf Setter und Aufrufer.
 - **Logbuch**: ein Setter loggt nichts. Jede Änderung über eine Methode hinterlässt eine Spur.
 
-## 16. Business Methods: Guards und Rules
+## 18. Business Methods: Guards und Rules
 
 Ein Guard prüft den Parameter, eine Business Rule prüft die Situation. Zwei Prüfungen, zwei Exceptions, zwei Schuldige.
 
@@ -292,7 +361,7 @@ Rules.Require(ShipCount < MaxDocks, "Kein Pylon frei.");    // so schreiben wir 
 
 - **Rules.Require**: ist die Bedingung falsch, wirft es die `StarshipException` mit der Meldung.
 
-## 17. Helpers
+## 19. Helpers
 
 Ein Helper macht eine Businessmethode kürzer und ist von außen unsichtbar.
 
@@ -308,7 +377,7 @@ private Coordinate NextPosition(Coordinate target)
 
 - **private**: niemand außerhalb der Klasse ruft einen Helper.
 
-## 18. Entity und Value Object
+## 20. Entity und Value Object
 
 Alles in Shared ist ein Value Object, Station und Schiffe sind Entities.
 
@@ -321,7 +390,7 @@ public class CargoShip : BaseShip { ... }        // Entity
 - **Value Object**: nur Werte, keine `Id`, unveränderlich. Zwei mit gleichen Werten sind gleich. Immer ein `record`.
 - **Entity**: hat eine `Id` und einen Lebenslauf. Sie ändert sich über Businessmethoden, bleibt aber dasselbe Ding. Immer eine `class`.
 
-## 19. Beziehungen: Richtung und Anzahl
+## 21. Beziehungen: Richtung und Anzahl
 
 Jede Beziehung hat eine Anzahl und eine Navigationsrichtung. Beides entscheidet ihr beim Modell, nicht beim Programmieren.
 
@@ -340,7 +409,7 @@ public IReadOnlyList<CrewMember> Crew => ...;         // BaseShip -> CrewMember:
 - **Uni**: Navigation in eine Richtung, nur eine Seite verweist auf die andere.
 - **Bi**: Navigation in beide Richtungen, beide Seiten verweisen aufeinander, nur wenn der Rückweg gebraucht wird.
 
-## 20. Beziehungen pflegen: der Parent setzt beide Seiten
+## 22. Beziehungen pflegen: der Parent setzt beide Seiten
 
 Bei einer Beziehung gibt es einen Parent und ein Child. Der Parent ist der fachliche Owner, das Child gehört zu ihm: ein Logbuch zu seiner Entity, ein Schiff zu seiner Station.  
 Der Parent setzt die Beziehung, bei uni eine Seite, bei bi beide, in einer Methode und in fester Reihenfolge.
@@ -361,7 +430,7 @@ public void Dock(BaseShip ship)  // 1:n in SpaceStation
 - **Komposition**: Das Child entsteht im Konstruktor des Parents. `Logbook = new Logbook(this)`, einmal, nie getauscht.
 - **Aggregation**: Das Child kommt und geht über Methoden. `Dock` setzt `Station`, `Undock` setzt `null`, deshalb nullable.
 
-## 21. Tests
+## 23. Tests
 
 Jeder Test heißt `Sut_ShouldXxx_WhenXxx`: Was wird getestet, was soll passieren, unter welcher Bedingung.
 
@@ -416,11 +485,11 @@ public void Dock_ShouldThrow_WhenShipIsAlreadyDocked()                 // Negati
 
 ---
 
-# Teil C: C# Techniken
+# Teil D: C# Techniken
 
 Jedes Kapitel zeigt zuerst **Vorher** (so kennt ihr es) und dann **Nachher** (so schreiben wir es).
 
-## 22. Auto Properties
+## 24. Auto Properties
 
 Der Compiler schreibt das Backing Field, ihr schreibt nur das Wort, das sagt, wer schreiben darf und wann.
 
@@ -453,7 +522,7 @@ var xhosa = new CargoShip("Xhosa", home, 100) { BuiltAt = new DateOnly(2360, 5, 
 - **Konstruktor**: alles, was aus einem Parameter kommt oder geprüft wird. Eine `{ get; }` Property kann nur hier gesetzt werden.
 - **Object Initializer**: `{ BuiltAt = ... }` direkt hinter `new` überschreibt den direkten Wert. Geht nur bei `init` und `set`, danach ist `init` für immer zu. Was sich später ändert, hat `private set` und wird nur in Businessmethoden gesetzt.
 
-## 23. Records
+## 25. Records
 
 Ein Typ, der nur aus Werten besteht, braucht Konstruktor, Gleichheit und `ToString`. Das sind 12 Zeilen, die immer gleich aussehen.
 
@@ -495,7 +564,7 @@ public record CrewMember                                      // Record mit eige
 - **Positional Record**: Props und Konstruktor aus der Klammer. Nehmt ihn, wenn es nichts zu prüfen gibt.
 - **Eigener Konstruktor**: sobald ein Wert geprüft oder getrimmt wird. `CrewMember`, `DistressSignal`.
 
-## 24. Equality
+## 26. Equality
 
 Wann sind zwei Objekte gleich? Ein Record nach seinen Werten, eine Entity nach ihrer Id. Ohne eure Hilfe vergleicht C# nur die Adresse im Speicher.
 
@@ -532,7 +601,7 @@ _ships.Contains(b);                                          // true, Dock lehnt
 - **Entity**: gleicher Typ und gleiche `Id`. Zwei Frachter namens Xhosa sind zwei Schiffe. `Equals(BaseEntity?)` ist die typsichere Fassung, `Equals(object?)` leitet dorthin weiter.
 - **GetHashCode**: wer `Equals` überschreibt, muss auch den Hash überschreiben, sonst verhalten sich `HashSet` und `Dictionary` falsch. Der Hash darf sich nie ändern, deshalb ist `Id` `init`.
 
-## 25. Equality: Operator Overloading
+## 27. Equality: Operator Overloading
 
 `Equals` ist überschrieben, aber `a == b` sagt immer noch „nicht gleich". Für `==` und `!=` muss die Klasse die Operatoren selbst festlegen.
 
@@ -558,7 +627,7 @@ new Coordinate(3, 4) == new Coordinate(3, 4);                // true, beim Recor
 - **null**: beide müssen `null` auf beiden Seiten vertragen, deshalb die Prüfung mit `is null` vor `Equals`.
 - **Record**: bekommt `==` und `!=` geschenkt, genau wie `Equals`. Nur eine Klasse muss sie selbst schreiben.
 
-## 26. Primary Constructor
+## 28. Primary Constructor
 
 Ein Konstruktor, der nur weiterreicht, ist drei Zeilen für nichts. Seit C# 12 dürfen die Parameter direkt am Klassennamen stehen.
 
@@ -581,7 +650,7 @@ public class StarshipException(string message) : Exception(message);   // Primar
 - **Kein Platz für Guards**: ein Primary Constructor hat keinen Rumpf. Prüfen und Trimmen geht nicht, `BaseEntity` und `CargoShip` brauchen deshalb den ausgeschriebenen Konstruktor.
 - **Wo er passt**: überall, wo nur weitergereicht wird. Bei uns nur `StarshipException`. `SpaceStation` und `RescueShip` könnten ihn auch, behalten aber die lange Form, damit alle Entities gleich aussehen.
 
-## 27. Pattern Matching
+## 29. Pattern Matching
 
 Typ prüfen und dann casten, zwei Bedingungen mit `&&` verknüpfen, `!= null` schreiben: Das geht in einer Frage mit `is`.
 
@@ -604,7 +673,7 @@ if (xhosa.Distress is not null)                 // null-Pattern
 - **Property Pattern**: prüft Properties in geschweiften Klammern, mehrere mit Komma.
 - **Relationales Pattern**: `<`, `<=`, `>`, `>=` gegen einen konstanten Wert. Deshalb muss `MaxFuel` eine `const` sein.
 
-## 28. Von `if` zur Switch Expression
+## 30. Von `if` zur Switch Expression
 
 Eine Methode mit drei `return`, nur um einen Wert auszuwählen. Das geht als ein Ausdruck.
 
@@ -636,9 +705,9 @@ public ShipStatus Status => this switch                              // Switch E
 
 - **Expression**: liefert einen Wert, deshalb passt sie hinter `=>` in eine Query.
 - **Reihenfolge**: die erste passende Zeile gewinnt. Das Wichtigste steht oben, `_` fängt den Rest.
-- **this switch**: das Objekt selbst wird gegen die Patterns aus Kapitel 27 geprüft.
+- **this switch**: das Objekt selbst wird gegen die Patterns aus Kapitel 29 geprüft.
 
-## 29. Extension Methods
+## 31. Extension Methods
 
 Eine Frage an die ganze Flotte gehört zu keiner Entity. Sie landet in einer statischen Hilfsklasse, und der Aufruf liest sich wie ein Werkzeug, nicht wie eine Frage an die Liste.
 
@@ -668,7 +737,7 @@ var inSpace = fleet.InSpace();                // die Liste steht links vom Punkt
 - **static**: Klasse und Methode müssen `static` sein, und `Program.cs` braucht `using StarShip.Domain.Queries;`.
 - **LINQ**: `Where`, `Count` und `MinBy` sind genau so gebaut, Extension Methods auf `IEnumerable<T>`. Deshalb lassen sie sich verketten: `fleet.InSpace().Select(s => s.Name)`.
 
-## 30. `virtual`, `override` und `base`
+## 32. `virtual`, `override` und `base`
 
 Eine Basisklasse gibt ein Verhalten vor, das ein Kind ändern darf. Drei Wörter: `virtual` erlaubt es, `override` macht es, `base` nutzt das Original.
 
@@ -701,7 +770,7 @@ public override IEnumerable<BaseShip> Scan(IEnumerable<BaseShip> ships) =>
 - **override**: steht im Kind, gleiche Signatur, ersetzt die Fassung der Basis. Wer ein `BaseShip` in der Hand hat und `Report()` ruft, bekommt trotzdem die Fassung des Frachters.
 - **base**: ruft die Fassung der Basis aus dem Kind heraus. `CargoShip` hängt an, `RescueShip` filtert.
 
-## 31. Nullable
+## 33. Nullable
 
 `xhosa.Station.Name` läuft durch den Compiler und crasht im All, wenn das Schiff gerade nicht angedockt ist.
 
@@ -731,7 +800,7 @@ var station = Station ?? throw new StarshipException($"{Name} ist nicht angedock
 - **Fehler statt Warnung**: `WarningsAsErrors` macht aus jeder möglichen `NullReferenceException` einen Build-Fehler.
 - **`?.` und `?? throw`**: `?.` greift nur zu, wenn nicht `null`. `?? throw` holt den Wert oder wirft, danach ist der Wert sicher nicht `null`.
 
-## 32. Strings
+## 34. Strings
 
 Text mit `+` zusammenkleben, `\n` für Zeilen und `PadRight` für Spalten: Das liest niemand gern.
 
@@ -760,7 +829,7 @@ $"""
 - **Linksbündig**: `{"Status",-12}` füllt rechts mit Leerzeichen auf 12 Zeichen auf, `Status      `. Das Minus heißt links, so entstehen die Spalten im Report.
 - **Rechtsbündig**: `{Fuel,3}` füllt links auf, `  7`. Ohne Minus heißt rechts, so stehen Zahlen untereinander. `{SentAt:HH:mm:ss}` formatiert eine Zeit.
 
-## 33. Factory Method
+## 35. Factory Method
 
 Ein Konstruktor mit einem Enum-Parameter liest sich schlecht und lässt sich leicht vertippen. Eine statische Methode mit sprechendem Namen nimmt die Entscheidung ab.
 

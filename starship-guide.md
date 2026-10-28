@@ -38,7 +38,7 @@
 
 Bevor es losgeht, die Hintergründe: Warum Schichten, was ist eine Solution, was ein Projekt.
 
-📖 Nachlesen: [Warum Software Architecture (Design)?](starship-technical-background.md#1-warum-software-architecture-design), [Separation of Concerns](starship-technical-background.md#2-separation-of-concerns), [Cohesion und Coupling](starship-technical-background.md#3-cohesion-und-coupling), [Benefits of Good Architecture (Design)](starship-technical-background.md#4-benefits-of-good-architecture-design), [Unsere Separation of Concerns](starship-technical-background.md#5-unsere-separation-of-concerns), [C# Projekte und Solution](starship-technical-background.md#6-c-projekte-und-solution)
+📖 Nachlesen: [Warum Software Architecture (Design)?](starship-technical-background.md#1-warum-software-architecture-design), [Separation of Concerns](starship-technical-background.md#2-separation-of-concerns), [Cohesion und Coupling](starship-technical-background.md#3-cohesion-und-coupling), [Benefits of Good Architecture (Design)](starship-technical-background.md#4-benefits-of-good-architecture-design), [Unsere Separation of Concerns](starship-technical-background.md#5-unsere-separation-of-concerns), [Struktur: Solution und Projekte](starship-technical-background.md#6-struktur-solution-und-projekte), [Dateien: csproj, bin und obj](starship-technical-background.md#7-dateien-csproj-bin-und-obj), [Lifecycle: die dotnet Befehle](starship-technical-background.md#8-lifecycle-die-dotnet-befehle)
 
 #### Schritt für Schritt in Rider
 
@@ -50,6 +50,10 @@ Die Tastenkürzel stehen für Mac, Windows in Klammern: `⌘` ist `Ctrl`, `⌥` 
 
 2. Rider hat eine `.gitignore` angelegt, sie sagt Git, was nicht ins Repo gehört: `bin/`, `obj/` und drei Rider Einträge.
    Drei Zeilen fehlen noch, hängt sie an: `.idea/` (Rider Einstellungen), `*.DotSettings.user` (persönliche Rider Einstellungen zur Solution) und `.DS_Store` (Mac Finder).
+   Die Datei siehst du nur in der Ansicht **File System**: oben im Explorer von **Solution** auf **File System** umschalten.
+   **Solution** zeigt nur die Projekte und ihre Dateien, **File System** jeden Ordner und jede Datei auf der Platte.
+
+<img src="_assets/setup_02a_explorer_menu.png" alt="Explorer Ansicht" width="400" style="margin-left: 100px; margin-top: 16px">
 
 <img src="_assets/setup_02_gitignore.png" alt="gitignore" width="640" style="margin-left: 100px; margin-top: 16px">
 
@@ -57,7 +61,7 @@ Die Tastenkürzel stehen für Mac, Windows in Klammern: `⌘` ist `Ctrl`, `⌥` 
 
 <img src="_assets/setup_03_initial_commit.png" alt="Initial Commit" width="400" style="margin-left: 100px; margin-top: 16px">
 
-4. Rechtsklick auf die Solution, `Add > New Project…`, **Class Library** `StarShip.Domain`, Framework `net10.0`.
+4. Zurück auf die Ansicht **Solution**, dort arbeiten wir ab jetzt. Rechtsklick auf die Solution, `Add > New Project…`, **Class Library** `StarShip.Domain`, Framework `net10.0`.
 
 <img src="_assets/setup_04_add_classlib.png" alt="Class Library" width="640" style="margin-left: 100px; margin-top: 16px">
 
@@ -71,7 +75,7 @@ Die Tastenkürzel stehen für Mac, Windows in Klammern: `⌘` ist `Ctrl`, `⌥` 
 
 7. Rechtsklick `StarShip.App`, `Add > Reference…`, Häkchen bei `StarShip.Domain`. Dasselbe für `StarShip.Tests`.
    Erst mit der Referenz kann ein Projekt die Klassen des anderen benutzen: `using StarShip.Domain.Models;` in `Program.cs` und in den Tests.
-   App und Tests kennen die Domäne, die Domäne kennt niemanden.
+   App und Tests kennen die Domäne, die Domäne kennt niemanden. 📖 Nachlesen: [Struktur: Solution und Projekte](starship-technical-background.md#6-struktur-solution-und-projekte)
 
 <img src="_assets/setup_07a_add_reference_menu.png" alt="Add Reference Menü App" width="640" style="margin-left: 100px; margin-top: 16px">
 
@@ -82,6 +86,8 @@ Die Tastenkürzel stehen für Mac, Windows in Klammern: `⌘` ist `Ctrl`, `⌥` 
 <img src="_assets/setup_07c_add_reference_tests.png" alt="Reference Tests" width="400" style="margin-left: 100px; margin-top: 16px">
 
 8. Aufräumen: `Class1.cs` und `UnitTest1.cs` löschen, Ordner anlegen wie im Baum unten.
+   Unter `Dependencies > Projects` steht `StarShip.Domain`, das ist die Referenz aus Schritt 7.
+   `bin/`, `obj/` und `.git` zeigt die Ansicht **Solution** nicht, die gibt es nur im **File System**.
 
 <img src="_assets/setup_08_folders.png" alt="Ordner" width="640" style="margin-left: 100px; margin-top: 16px">
 
@@ -97,8 +103,12 @@ StarShip/
   StarShip.Tests/        eure Tests
 ```
 
+> 💡 Der Namespace folgt der Ordnerstruktur: Projektname plus Ordnerpfad, Punkt statt Schrägstrich. `Models/Shared/Coordinate.cs` beginnt mit `namespace StarShip.Domain.Models.Shared;`.
+> Legt ihr die Klasse in Rider im richtigen Ordner an, steht die Zeile schon drin. Passt sie nicht, warnt Rider mit „Namespace does not correspond to file location", `Alt+Enter` repariert es.
+
 9. In `StarShip.Domain.csproj` in der `PropertyGroup` ergänzen: `<WarningsAsErrors>nullable</WarningsAsErrors>`.
    Damit meldet der Compiler jede mögliche `null` Referenz als Fehler, nicht nur als Warnung.
+   Die csproj Datei öffnet sich in der Ansicht Solution per Doppelklick auf das Projekt. Was sonst noch drinsteht: [Dateien: csproj, bin und obj](starship-technical-background.md#7-dateien-csproj-bin-und-obj).
 
 <img src="_assets/setup_09_csproj.png" alt="csproj" width="640" style="margin-left: 100px; margin-top: 16px">
 
@@ -106,7 +116,13 @@ StarShip/
 
 <img src="_assets/setup_10_commit.png" alt="Commit" width="520" style="margin-left: 100px; margin-top: 16px">
 
-> 💡 Namespaces: `StarShip.Domain.Models`, `StarShip.Domain.Models.Shared`, `StarShip.Domain.Exceptions`, `StarShip.Domain.Queries`.
+11. Zwei Ansichten im Explorer: oben umschaltbar, beide zeigen dieselbe Solution, aber nicht dasselbe. 📖 Nachlesen: [Dateien: csproj, bin und obj](starship-technical-background.md#7-dateien-csproj-bin-und-obj)
+    - **Solution**: die Projekte, ihre Referenzen unter `Dependencies` und der Code. So sieht der Compiler die Solution. Hier arbeiten wir.
+    - **File System**: jeder Ordner und jede Datei auf der Platte, auch `.git`, `.idea`, `bin/`, `obj/` und die csproj Dateien. Hier sieht man, was die `.gitignore` aus Git heraushält.
+
+<img src="_assets/setup_11_solution_view.png" alt="Ansicht Solution" width="400" style="margin-left: 100px; margin-top: 16px">
+
+<img src="_assets/setup_12_file_system_view.png" alt="Ansicht File System" width="400" style="margin-left: 100px; margin-top: 16px">
 
 ### 0.2 Domain Model
 
@@ -139,7 +155,7 @@ public enum LogType { Docking, Warp, Crew, Fuel, Cargo, Distress, Rescue }
 
 Ein Record ist ein Typ, der nur aus Werten besteht und sich nie ändert. Zwei Records mit gleichen Werten sind gleich.
 
-📖 Nachlesen: [Records](starship-technical-background.md#23-records)
+📖 Nachlesen: [Records](starship-technical-background.md#25-records)
 
 Dasselbe Popup, Typ **Record**.
 
@@ -207,7 +223,7 @@ public record DistressSignal
 
 Die Alarmanlage für gebrochene Regeln. Beides liegt in `Exceptions`.
 
-📖 Nachlesen: [Guards und Rules](starship-technical-background.md#16-business-methods-guards-und-rules), [Primary Constructor](starship-technical-background.md#26-primary-constructor)
+📖 Nachlesen: [Guards und Rules](starship-technical-background.md#18-business-methods-guards-und-rules), [Primary Constructor](starship-technical-background.md#28-primary-constructor)
 
 ```csharp
 public class StarshipException(string message) : Exception(message);
@@ -235,7 +251,7 @@ public static class Rules
 
 Eine Entity hat eine Id und ein Leben lang Geschichte. Sie liegen in `Models`, jede in einer eigenen Datei.
 
-📖 Nachlesen: [Entity und Value Object](starship-technical-background.md#18-entity-und-value-object)
+📖 Nachlesen: [Entity und Value Object](starship-technical-background.md#20-entity-und-value-object)
 
 #### BaseEntity
 
@@ -244,7 +260,7 @@ Rechtsklick auf `Models`, `Add > New Class/Interface…`, Typ **Class**. So ents
 
 <img src="_assets/akt_0_03_new_class.png" alt="Neue Klasse" width="560" style="margin-left: 100px; margin-top: 16px">
 
-📖 Nachlesen: [Abschnitte einer Klasse](starship-technical-background.md#7-abschnitte-einer-klasse), [Properties](starship-technical-background.md#10-properties), [Auto Properties](starship-technical-background.md#22-auto-properties), [Queries](starship-technical-background.md#11-computed-properties-queries)
+📖 Nachlesen: [Abschnitte einer Klasse](starship-technical-background.md#9-abschnitte-einer-klasse), [Properties](starship-technical-background.md#12-properties), [Auto Properties](starship-technical-background.md#24-auto-properties), [Queries](starship-technical-background.md#13-computed-properties-queries)
 
 ```csharp
 public abstract class BaseEntity : IEquatable<BaseEntity>
@@ -282,7 +298,7 @@ public abstract class BaseEntity : IEquatable<BaseEntity>
 - Ein Schiff entsteht mit Namen und Ort. Ohne Namen gibt es kein Schiff.
 - Das Logbuch ist vom ersten Moment an dabei. Die Entity erzeugt es selbst und trägt sich als Besitzer ein.
 
-📖 Nachlesen: [Constructor](starship-technical-background.md#12-constructor)
+📖 Nachlesen: [Constructor](starship-technical-background.md#14-constructor)
 
 ```csharp
     // --- Business Methods ---
@@ -324,13 +340,13 @@ public abstract class BaseEntity : IEquatable<BaseEntity>
 ```
 
 - Zwei Entities sind gleich, wenn sie denselben Typ und dieselbe `Id` haben. Das braucht die Station, wenn sie prüft, ob ein Schiff schon an einem Pylon hängt.
-- 📖 Nachlesen: [Equality](starship-technical-background.md#24-equality), [Equality: Operator Overloading](starship-technical-background.md#25-equality-operator-overloading)
+- 📖 Nachlesen: [Equality](starship-technical-background.md#26-equality), [Equality: Operator Overloading](starship-technical-background.md#27-equality-operator-overloading)
 
 #### Logbook
 
 Das Logbuch einer Entity, nur hinten anhängen, nie löschen.
 
-📖 Nachlesen: [Backing Fields](starship-technical-background.md#9-backing-fields), [Beziehungen: Richtung und Anzahl](starship-technical-background.md#19-beziehungen-richtung-und-anzahl)
+📖 Nachlesen: [Backing Fields](starship-technical-background.md#11-backing-fields), [Beziehungen: Richtung und Anzahl](starship-technical-background.md#21-beziehungen-richtung-und-anzahl)
 
 ```csharp
 public class Logbook
@@ -395,7 +411,7 @@ public class Logbook
 
 Die gemeinsame Basis aller Schiffe. Warpkern, Crew, Notruf, Station.
 
-📖 Nachlesen: [Constants](starship-technical-background.md#8-constants), [Invariants](starship-technical-background.md#13-invariants)
+📖 Nachlesen: [Constants](starship-technical-background.md#10-constants), [Invariants](starship-technical-background.md#15-invariants)
 
 ```csharp
 public abstract class BaseShip : BaseEntity
@@ -555,7 +571,7 @@ public class SpaceStation : BaseEntity
 
 ### ✅ Checkpoint
 
-- Alle Typen sind angelegt, `dotnet build` läuft ohne Fehler.
+- Alle Typen sind angelegt, `dotnet build` läuft ohne Fehler. 📖 Nachlesen: [Lifecycle: die dotnet Befehle](starship-technical-background.md#8-lifecycle-die-dotnet-befehle)
 - `git commit -m "feat: domain model with properties and constructors"`
 
 <img src="_assets/akt_0_04_commit.png" alt="Commit" width="640" style="margin-left: 100px; margin-top: 16px">
@@ -588,7 +604,7 @@ Dieselbe Person darf nicht zweimal im Pool stehen, und jede Aufnahme landet im L
 
 Diese Methode ist das Muster für alle anderen. Sie zeigt die vier Schritte einer Businessmethode, deshalb steht sie hier mit Lösung.
 
-📖 Nachlesen: [Business Methods](starship-technical-background.md#14-business-methods), [Guards und Rules](starship-technical-background.md#16-business-methods-guards-und-rules)
+📖 Nachlesen: [Business Methods](starship-technical-background.md#16-business-methods), [Guards und Rules](starship-technical-background.md#18-business-methods-guards-und-rules)
 
 ```csharp
     /// <summary>Adds a crew member to the crew pool of the station.</summary>
@@ -617,7 +633,7 @@ Diese Methode ist das Muster für alle anderen. Sie zeigt die vier Schritte eine
 
 Legt in `StarShip.Tests` die Datei `SpaceStationTests.cs` an. Jeder Test heißt nach dem Muster `Sut_Should_When` und hat drei Teile: Given, When, Then.
 
-📖 Nachlesen: [Tests](starship-technical-background.md#21-tests)
+📖 Nachlesen: [Tests](starship-technical-background.md#23-tests)
 
 ```csharp
 using StarShip.Domain.Exceptions;
@@ -664,7 +680,7 @@ Tests laufen in Rider mit Rechtsklick auf `StarShip.Tests`, `Run Unit Tests`. Be
 
 <img src="_assets/akt_1_01_run_tests.png" alt="Tests in Rider" width="640" style="margin-left: 100px; margin-top: 16px">
 
-Oder im Terminal mit `dotnet test`, so läuft es später auch auf einem Build Server.
+Oder im Terminal mit `dotnet test`, so läuft es später auch auf einem Build Server. Einen einzelnen Test oder eine Klasse filtert man, siehe [Lifecycle: die dotnet Befehle](starship-technical-background.md#8-lifecycle-die-dotnet-befehle).
 
 <img src="_assets/akt_1_02_dotnet_test.png" alt="dotnet test" width="640" style="margin-left: 100px; margin-top: 16px">
 
@@ -677,7 +693,7 @@ Oder im Terminal mit `dotnet test`, so läuft es später auch auf einem Build Se
 eine Lieferung von null oder weniger ist ein Programmierfehler und kein Geschäftsfall. Nach der Lieferung steht im Logbuch, wie viel angekommen ist.
 `FuelPool` hat `private set`, von außen ändert ihn nur diese Methode.
 
-📖 Nachlesen: [Warum kein public Setter](starship-technical-background.md#15-business-methods-warum-kein-public-setter)
+📖 Nachlesen: [Warum kein public Setter](starship-technical-background.md#17-business-methods-warum-kein-public-setter)
 
 ```csharp
 public void Supply(int amount)
@@ -697,7 +713,7 @@ public void Supply(int amount)
 **Aufgabe:** Statt `new CrewMember("Kira", CrewRole.Captain)` soll es `CrewMember.Captain("Kira")` geben, für jede der vier Rollen
 eine statische Methode, die ein neues `CrewMember` mit fester Rolle liefert. Der Guard im Konstruktor gilt weiter, die Factory wählt nur die Rolle.
 
-📖 Nachlesen: [Factory Method](starship-technical-background.md#33-factory-method)
+📖 Nachlesen: [Factory Method](starship-technical-background.md#35-factory-method)
 
 Die erste Factory Method als Lösung, die drei anderen sehen genauso aus:
 
@@ -724,7 +740,7 @@ public static CrewMember Medic(string name)
 und beide müssen immer zusammenpassen. Deshalb setzt die Station beide Seiten in einer Methode und in fester Reihenfolge,
 das Schiff macht in 1.6 nur seinen Teil.
 
-📖 Nachlesen: [Beziehungen pflegen](starship-technical-background.md#20-beziehungen-pflegen-der-parent-setzt-beide-seiten)
+📖 Nachlesen: [Beziehungen pflegen](starship-technical-background.md#22-beziehungen-pflegen-der-parent-setzt-beide-seiten)
 
 ```csharp
 public void Dock(BaseShip ship)
@@ -772,7 +788,7 @@ public void Detach()
 **Aufgabe:** Das Schiff nimmt Antimaterie in den Warpkern. Es tankt nur im Dock und nie über `MaxFuel` hinaus.
 Woher die Antimaterie kommt, weiß das Schiff nicht, das regelt die Station in 1.8.
 
-📖 Nachlesen: [Invariants](starship-technical-background.md#13-invariants)
+📖 Nachlesen: [Invariants](starship-technical-background.md#15-invariants)
 
 ```csharp
 public void AddFuel(int amount)
@@ -812,7 +828,7 @@ public void Refuel(BaseShip ship)
 **Aufgabe:** Die Station beantwortet Fragen über ihre Listen, ohne etwas zu speichern. Jede Query rechnet beim Zugriff aus `Ships` oder `CrewPool`,
 deshalb ist sie nie veraltet. Vier Queries, von einem Operator bis drei, alle im Abschnitt `// --- Queries ---`.
 
-📖 Nachlesen: [Queries](starship-technical-background.md#11-computed-properties-queries)
+📖 Nachlesen: [Queries](starship-technical-background.md#13-computed-properties-queries)
 
 ```csharp
 public int ShipCount => ...
@@ -859,7 +875,7 @@ public record RoleCount(CrewRole Role, int Count)
 **Aufgabe:** Ein Schiff weiß über sich, ob die Pflichtrollen komplett sind, welche fehlen, wo es ist (`Status`) und ob es starten darf (`Readiness`).
 Alles sind Queries über `Crew`, `Station`, `Distress` und `Fuel`, nichts davon wird gespeichert.
 
-📖 Nachlesen: [Pattern Matching](starship-technical-background.md#27-pattern-matching), [Von if zur Switch Expression](starship-technical-background.md#28-von-if-zur-switch-expression)
+📖 Nachlesen: [Pattern Matching](starship-technical-background.md#29-pattern-matching), [Von if zur Switch Expression](starship-technical-background.md#30-von-if-zur-switch-expression)
 
 `HasRequiredRoles` ist die erste Query, bei der ein Operator in einem anderen steckt. Der Anfang als Teaser:
 
@@ -914,7 +930,7 @@ public Readiness Readiness => ...
 **Aufgabe:** Eine Koordinate schreibt sich als `(X,Y) Lichtjahre`, ohne Leerzeichen nach dem Komma. Der Compiler hat für den Record
 schon ein `ToString` erzeugt, das `Coordinate { X = 100, Y = 200 }` ausgibt, deshalb überschreiben wir es.
 
-📖 Nachlesen: [Strings](starship-technical-background.md#32-strings)
+📖 Nachlesen: [Strings](starship-technical-background.md#34-strings)
 
 ```csharp
     /// <summary>Formats the coordinate as (X,Y) Lichtjahre.</summary>
@@ -1157,7 +1173,7 @@ public void Unboard(CrewMember member)
 die nötige Anzahl im Pool und erst wenn alle gefunden sind, gehen sie über `Board` an Bord und verlassen den Pool. `UnassignCrew` holt die
 ganze Crew zurück. Erst prüfen, dann ändern, sonst sitzt am Ende ein Captain an Bord und der Pilot fehlt.
 
-📖 Nachlesen: [Helpers](starship-technical-background.md#17-helpers)
+📖 Nachlesen: [Helpers](starship-technical-background.md#19-helpers)
 
 ```csharp
 public void AssignCrew(BaseShip ship)
@@ -1213,7 +1229,7 @@ public void Unload(int tons)
 `Station` ist `SpaceStation?`, deshalb holt ihr sie ohne `!` mit einer Throw Expression: `var station = Station ?? throw new StarshipException(...)`.
 Die Meldung bei fehlender Crew nennt die fehlenden Rollen aus `MissingRoles`.
 
-📖 Nachlesen: [Nullable](starship-technical-background.md#31-nullable)
+📖 Nachlesen: [Nullable](starship-technical-background.md#33-nullable)
 
 ```csharp
 public void Launch()
@@ -1292,7 +1308,7 @@ im Ordner `Queries` und hängen an `IEnumerable<BaseShip>`. Wer sie aufruft, gib
 allen drei Schiffen, egal ob angedockt oder im All, oder `ds9.Ships`, dann nur die angedockten. Ergebnisse mit mehreren Werten je Zeile sind
 Positional Records im Ordner `Queries`.
 
-📖 Nachlesen: [Extension Methods](starship-technical-background.md#29-extension-methods), [Records](starship-technical-background.md#23-records)
+📖 Nachlesen: [Extension Methods](starship-technical-background.md#31-extension-methods), [Records](starship-technical-background.md#25-records)
 
 Die erste als Lösung. Legt im Ordner `Queries` die Datei `ShipQueries.cs` an, eine statische Klasse, die Methode mit `this` vor dem Parameter:
 
@@ -1366,7 +1382,7 @@ public static IReadOnlyList<FuelByType> TotalFuelByType(this IEnumerable<BaseShi
 
 **Aufgabe:** Der Frachter hängt an den Report des Schiffs eine Zeile `Cargo` an. Er ruft `base.Report()` auf und ergänzt, statt alles neu zu schreiben.
 
-📖 Nachlesen: [virtual, override und base](starship-technical-background.md#30-virtual-override-und-base)
+📖 Nachlesen: [virtual, override und base](starship-technical-background.md#32-virtual-override-und-base)
 
 ```csharp
 public override string Report()
@@ -1458,7 +1474,7 @@ Xhosa (CargoShip)
 ein Schiff hat genau einen oder keinen, deshalb ist `Distress` nullable. `Status` liefert ab jetzt `Distress`, ohne dass jemand ihn setzt.
 Mit `?.` lest ihr den Grund, ohne vorher auf `null` zu prüfen: `xhosa.Distress?.Reason`.
 
-📖 Nachlesen: [Entity und Value Object](starship-technical-background.md#18-entity-und-value-object), [Nullable](starship-technical-background.md#31-nullable)
+📖 Nachlesen: [Entity und Value Object](starship-technical-background.md#20-entity-und-value-object), [Nullable](starship-technical-background.md#33-nullable)
 
 ```csharp
 public void SendDistressSignal(string reason)
@@ -1529,7 +1545,7 @@ public static IReadOnlyList<DistressReport> DistressReports(this IEnumerable<Bas
 **Aufgabe:** Eine lokale Methode in `Program.cs`, keine Domäne: Die Domäne liefert den Zustand, die Beschreibung dafür gehört in die App.
 Eine Switch Expression über das Schiff mit Typ-Patterns (`CargoShip c`) und Property-Patterns (`{ IsFull: true }`), die erste passende Zeile gewinnt.
 
-📖 Nachlesen: [Pattern Matching](starship-technical-background.md#27-pattern-matching)
+📖 Nachlesen: [Pattern Matching](starship-technical-background.md#29-pattern-matching)
 
 ```csharp
 static string Describe(BaseShip ship)
@@ -1629,7 +1645,7 @@ public void Append(Logbook other)
 Reihenfolge, alle vor der ersten Änderung, sonst sitzen zwei Leute weder hier noch dort. Die fünf Regeln stehen nur einmal: ein privater Helper
 `string? RescueBlocker(target, home)` liefert die erste verletzte Regel als Meldung oder `null`. `CanRescue` fragt `is null`, `Rescue` wirft mit der Meldung.
 
-📖 Nachlesen: [Helpers](starship-technical-background.md#17-helpers)
+📖 Nachlesen: [Helpers](starship-technical-background.md#19-helpers)
 
 ```csharp
 public bool CanRescue(BaseShip target, SpaceStation home)
@@ -1668,7 +1684,7 @@ public static IReadOnlyList<BaseShip> WithinRange(this IEnumerable<BaseShip> shi
 **Aufgabe:** Jedes Schiff sieht `SensorRange` Lichtjahre weit. `Scan` liefert alle anderen Schiffe in dieser Reichweite, das nächste zuerst,
 das eigene Schiff nicht. `Scan` ist `virtual`, weil das Rettungsschiff in 4.5 anders scannt. Ein Wert ist für alle gleich (`const`), ein Verhalten darf sich je Typ unterscheiden (`virtual`).
 
-📖 Nachlesen: [virtual, override und base](starship-technical-background.md#30-virtual-override-und-base)
+📖 Nachlesen: [virtual, override und base](starship-technical-background.md#32-virtual-override-und-base)
 
 ```csharp
 public bool IsInSensorRange(BaseShip other)
@@ -1860,7 +1876,7 @@ public IReadOnlyList<TypeCount> ShipCountByType()
 **Aufgabe:** `Format` macht aus einem Eintrag eine Zeile in drei Spalten: Typ in eckigen Klammern, Verfasser, Nachricht. Ein Notruf bekommt
 das Label `[!!]` statt `[Distress]`. `Report` fügt alle Einträge mit `Format` zu einem Block zusammen, eine Zeile pro Eintrag.
 
-📖 Nachlesen: [Strings](starship-technical-background.md#32-strings)
+📖 Nachlesen: [Strings](starship-technical-background.md#34-strings)
 
 ```csharp
 public string Format(LogEntry entry)
