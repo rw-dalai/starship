@@ -390,9 +390,25 @@ public class CargoShip : BaseShip { ... }        // Entity
 - **Value Object**: nur Werte, keine `Id`, unveränderlich. Zwei mit gleichen Werten sind gleich. Immer ein `record`.
 - **Entity**: hat eine `Id` und einen Lebenslauf. Sie ändert sich über Businessmethoden, bleibt aber dasselbe Ding. Immer eine `class`.
 
-## 21. Beziehungen: Richtung und Anzahl
+## 21. Beziehungen: is a und has a
 
-Jede Beziehung hat eine Anzahl und eine Navigationsrichtung. Beides entscheidet ihr beim Modell, nicht beim Programmieren.
+Zwei Arten von Beziehungen: **is a** (Vererbung) und **has a** (Assoziation). Ein Frachter ist ein Schiff, eine Station hat Schiffe.
+
+```csharp
+public class CargoShip : BaseShip                     // is a: CargoShip ist ein BaseShip, erbt Props und Methoden
+public Logbook Logbook { get; }                       // has a, Komposition: das Logbuch lebt und stirbt mit der Entity
+public IReadOnlyList<BaseShip> Ships => ...;          // has a, Aggregation: die Schiffe gibt es auch ohne die Station
+```
+
+- **is a**: die Kindklasse erbt alles und passt überall hin, wo die Basisklasse erwartet wird. Ein `CargoShip` passt in `List<BaseShip>`.
+- **has a, Komposition**: das Teil gehört ganz zum Ganzen, entsteht mit ihm und geht mit ihm. Das Logbuch ohne Entity gibt es nicht.
+- **has a, Aggregation**: das Teil ist eigenständig und wird nur zugeordnet. Die Xhosa dockt an, dockt ab, existiert weiter.
+
+Die nächsten zwei Kapitel handeln nur von has a: Anzahl und Richtung, dann wer die Beziehung setzt.
+
+## 22. Beziehungen: Richtung und Anzahl
+
+Jede has a Beziehung hat eine Anzahl und eine Navigationsrichtung. Beides entscheidet ihr beim Modell, nicht beim Programmieren.
 
 ```csharp
 public Logbook Logbook { get; }                       // BaseEntity -> Logbook: 1:1, bidirektional
@@ -409,7 +425,7 @@ public IReadOnlyList<CrewMember> Crew => ...;         // BaseShip -> CrewMember:
 - **Uni**: Navigation in eine Richtung, nur eine Seite verweist auf die andere.
 - **Bi**: Navigation in beide Richtungen, beide Seiten verweisen aufeinander, nur wenn der Rückweg gebraucht wird.
 
-## 22. Beziehungen pflegen: der Parent setzt beide Seiten
+## 23. Beziehungen pflegen: der Parent setzt beide Seiten
 
 Bei einer Beziehung gibt es einen Parent und ein Child. Der Parent ist der fachliche Owner, das Child gehört zu ihm: ein Logbuch zu seiner Entity, ein Schiff zu seiner Station.  
 Der Parent setzt die Beziehung, bei uni eine Seite, bei bi beide, in einer Methode und in fester Reihenfolge.
@@ -430,7 +446,7 @@ public void Dock(BaseShip ship)  // 1:n in SpaceStation
 - **Komposition**: Das Child entsteht im Konstruktor des Parents. `Logbook = new Logbook(this)`, einmal, nie getauscht.
 - **Aggregation**: Das Child kommt und geht über Methoden. `Dock` setzt `Station`, `Undock` setzt `null`, deshalb nullable.
 
-## 23. Tests
+## 24. Tests
 
 Jeder Test heißt `Sut_ShouldXxx_WhenXxx`: Was wird getestet, was soll passieren, unter welcher Bedingung.
 
@@ -489,7 +505,7 @@ public void Dock_ShouldThrow_WhenShipIsAlreadyDocked()                 // Negati
 
 Jedes Kapitel zeigt zuerst **Vorher** (so kennt ihr es) und dann **Nachher** (so schreiben wir es).
 
-## 24. Auto Properties
+## 25. Auto Properties
 
 Der Compiler schreibt das Backing Field, ihr schreibt nur das Wort, das sagt, wer schreiben darf und wann.
 
@@ -522,7 +538,7 @@ var xhosa = new CargoShip("Xhosa", home, 100) { BuiltAt = new DateOnly(2360, 5, 
 - **Konstruktor**: alles, was aus einem Parameter kommt oder geprüft wird. Eine `{ get; }` Property kann nur hier gesetzt werden.
 - **Object Initializer**: `{ BuiltAt = ... }` direkt hinter `new` überschreibt den direkten Wert. Geht nur bei `init` und `set`, danach ist `init` für immer zu. Was sich später ändert, hat `private set` und wird nur in Businessmethoden gesetzt.
 
-## 25. Records
+## 26. Records
 
 Ein Typ, der nur aus Werten besteht, braucht Konstruktor, Gleichheit und `ToString`. Das sind 12 Zeilen, die immer gleich aussehen.
 
@@ -564,7 +580,7 @@ public record CrewMember                                      // Record mit eige
 - **Positional Record**: Props und Konstruktor aus der Klammer. Nehmt ihn, wenn es nichts zu prüfen gibt.
 - **Eigener Konstruktor**: sobald ein Wert geprüft oder getrimmt wird. `CrewMember`, `DistressSignal`.
 
-## 26. Equality
+## 27. Equality
 
 Wann sind zwei Objekte gleich? Ein Record nach seinen Werten, eine Entity nach ihrer Id. Ohne eure Hilfe vergleicht C# nur die Adresse im Speicher.
 
@@ -601,7 +617,7 @@ _ships.Contains(b);                                          // true, Dock lehnt
 - **Entity**: gleicher Typ und gleiche `Id`. Zwei Frachter namens Xhosa sind zwei Schiffe. `Equals(BaseEntity?)` ist die typsichere Fassung, `Equals(object?)` leitet dorthin weiter.
 - **GetHashCode**: wer `Equals` überschreibt, muss auch den Hash überschreiben, sonst verhalten sich `HashSet` und `Dictionary` falsch. Der Hash darf sich nie ändern, deshalb ist `Id` `init`.
 
-## 27. Equality: Operator Overloading
+## 28. Equality: Operator Overloading
 
 `Equals` ist überschrieben, aber `a == b` sagt immer noch „nicht gleich". Für `==` und `!=` muss die Klasse die Operatoren selbst festlegen.
 
@@ -627,7 +643,7 @@ new Coordinate(3, 4) == new Coordinate(3, 4);                // true, beim Recor
 - **null**: beide müssen `null` auf beiden Seiten vertragen, deshalb die Prüfung mit `is null` vor `Equals`.
 - **Record**: bekommt `==` und `!=` geschenkt, genau wie `Equals`. Nur eine Klasse muss sie selbst schreiben.
 
-## 28. Primary Constructor
+## 29. Primary Constructor
 
 Ein Konstruktor, der nur weiterreicht, ist drei Zeilen für nichts. Seit C# 12 dürfen die Parameter direkt am Klassennamen stehen.
 
@@ -650,7 +666,7 @@ public class StarshipException(string message) : Exception(message);   // Primar
 - **Kein Platz für Guards**: ein Primary Constructor hat keinen Rumpf. Prüfen und Trimmen geht nicht, `BaseEntity` und `CargoShip` brauchen deshalb den ausgeschriebenen Konstruktor.
 - **Wo er passt**: überall, wo nur weitergereicht wird. Bei uns nur `StarshipException`. `SpaceStation` und `RescueShip` könnten ihn auch, behalten aber die lange Form, damit alle Entities gleich aussehen.
 
-## 29. Pattern Matching
+## 30. Pattern Matching
 
 Typ prüfen und dann casten, zwei Bedingungen mit `&&` verknüpfen, `!= null` schreiben: Das geht in einer Frage mit `is`.
 
@@ -673,7 +689,7 @@ if (xhosa.Distress is not null)                 // null-Pattern
 - **Property Pattern**: prüft Properties in geschweiften Klammern, mehrere mit Komma.
 - **Relationales Pattern**: `<`, `<=`, `>`, `>=` gegen einen konstanten Wert. Deshalb muss `MaxFuel` eine `const` sein.
 
-## 30. Von `if` zur Switch Expression
+## 31. Von `if` zur Switch Expression
 
 Eine Methode mit drei `return`, nur um einen Wert auszuwählen. Das geht als ein Ausdruck.
 
@@ -705,9 +721,9 @@ public ShipStatus Status => this switch                              // Switch E
 
 - **Expression**: liefert einen Wert, deshalb passt sie hinter `=>` in eine Query.
 - **Reihenfolge**: die erste passende Zeile gewinnt. Das Wichtigste steht oben, `_` fängt den Rest.
-- **this switch**: das Objekt selbst wird gegen die Patterns aus Kapitel 29 geprüft.
+- **this switch**: das Objekt selbst wird gegen die Patterns aus Kapitel 30 geprüft.
 
-## 31. Extension Methods
+## 32. Extension Methods
 
 Eine Frage an die ganze Flotte gehört zu keiner Entity. Sie landet in einer statischen Hilfsklasse, und der Aufruf liest sich wie ein Werkzeug, nicht wie eine Frage an die Liste.
 
@@ -737,7 +753,7 @@ var inSpace = fleet.InSpace();                // die Liste steht links vom Punkt
 - **static**: Klasse und Methode müssen `static` sein, und `Program.cs` braucht `using StarShip.Domain.Queries;`.
 - **LINQ**: `Where`, `Count` und `MinBy` sind genau so gebaut, Extension Methods auf `IEnumerable<T>`. Deshalb lassen sie sich verketten: `fleet.InSpace().Select(s => s.Name)`.
 
-## 32. `virtual`, `override` und `base`
+## 33. `virtual`, `override` und `base`
 
 Eine Basisklasse gibt ein Verhalten vor, das ein Kind ändern darf. Drei Wörter: `virtual` erlaubt es, `override` macht es, `base` nutzt das Original.
 
@@ -770,7 +786,7 @@ public override IEnumerable<BaseShip> Scan(IEnumerable<BaseShip> ships) =>
 - **override**: steht im Kind, gleiche Signatur, ersetzt die Fassung der Basis. Wer ein `BaseShip` in der Hand hat und `Report()` ruft, bekommt trotzdem die Fassung des Frachters.
 - **base**: ruft die Fassung der Basis aus dem Kind heraus. `CargoShip` hängt an, `RescueShip` filtert.
 
-## 33. Nullable
+## 34. Nullable
 
 `xhosa.Station.Name` läuft durch den Compiler und crasht im All, wenn das Schiff gerade nicht angedockt ist.
 
@@ -800,7 +816,7 @@ var station = Station ?? throw new StarshipException($"{Name} ist nicht angedock
 - **Fehler statt Warnung**: `WarningsAsErrors` macht aus jeder möglichen `NullReferenceException` einen Build-Fehler.
 - **`?.` und `?? throw`**: `?.` greift nur zu, wenn nicht `null`. `?? throw` holt den Wert oder wirft, danach ist der Wert sicher nicht `null`.
 
-## 34. Strings
+## 35. Strings
 
 Text mit `+` zusammenkleben, `\n` für Zeilen und `PadRight` für Spalten: Das liest niemand gern.
 
@@ -829,7 +845,7 @@ $"""
 - **Linksbündig**: `{"Status",-12}` füllt rechts mit Leerzeichen auf 12 Zeichen auf, `Status      `. Das Minus heißt links, so entstehen die Spalten im Report.
 - **Rechtsbündig**: `{Fuel,3}` füllt links auf, `  7`. Ohne Minus heißt rechts, so stehen Zahlen untereinander. `{SentAt:HH:mm:ss}` formatiert eine Zeit.
 
-## 35. Factory Method
+## 36. Factory Method
 
 Ein Konstruktor mit einem Enum-Parameter liest sich schlecht und lässt sich leicht vertippen. Eine statische Methode mit sprechendem Namen nimmt die Entscheidung ab.
 
@@ -858,7 +874,7 @@ var nog  = CrewMember.Pilot("Nog");
 
 Drei Datenstrukturen, drei Begriffe aus der Mathematik.
 
-## 36. List
+## 37. List
 
 <img src="_assets/technical_list.png" alt="List" width="640" style="margin-left: 100px; margin-top: 16px">
  
@@ -893,7 +909,7 @@ foreach (var member in _crew)        // in Einfügereihenfolge
 _crew.Where(c => c.Role == CrewRole.Pilot).ToList();   // LINQ liefert wieder eine List
 ```
 
-## 37. HashSet
+## 38. HashSet
 
 <img src="_assets/technical_hashset.png" alt="HashSet" width="640" style="margin-left: 100px; margin-top: 16px">
 
@@ -935,7 +951,7 @@ required.Order().ToList();           // sortiert, wenn die Ausgabe stabil sein s
 
 Nach außen `IReadOnlySet<CrewRole>`, dann kann niemand die Menge von außen verändern.
 
-## 38. Dictionary
+## 39. Dictionary
 
 <img src="_assets/technical_dictionary.png" alt="Dictionary" width="420" style="margin-left: 100px; margin-top: 16px">
 

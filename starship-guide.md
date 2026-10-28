@@ -155,7 +155,7 @@ public enum LogType { Docking, Warp, Crew, Fuel, Cargo, Distress, Rescue }
 
 Ein Record ist ein Typ, der nur aus Werten besteht und sich nie ändert. Zwei Records mit gleichen Werten sind gleich.
 
-📖 Nachlesen: [Records](starship-technical-background.md#25-records)
+📖 Nachlesen: [Records](starship-technical-background.md#26-records)
 
 Dasselbe Popup, Typ **Record**.
 
@@ -223,7 +223,7 @@ public record DistressSignal
 
 Die Alarmanlage für gebrochene Regeln. Beides liegt in `Exceptions`.
 
-📖 Nachlesen: [Guards und Rules](starship-technical-background.md#18-business-methods-guards-und-rules), [Primary Constructor](starship-technical-background.md#28-primary-constructor)
+📖 Nachlesen: [Guards und Rules](starship-technical-background.md#18-business-methods-guards-und-rules), [Primary Constructor](starship-technical-background.md#29-primary-constructor)
 
 ```csharp
 public class StarshipException(string message) : Exception(message);
@@ -260,7 +260,7 @@ Rechtsklick auf `Models`, `Add > New Class/Interface…`, Typ **Class**. So ents
 
 <img src="_assets/akt_0_03_new_class.png" alt="Neue Klasse" width="560" style="margin-left: 100px; margin-top: 16px">
 
-📖 Nachlesen: [Abschnitte einer Klasse](starship-technical-background.md#9-abschnitte-einer-klasse), [Properties](starship-technical-background.md#12-properties), [Auto Properties](starship-technical-background.md#24-auto-properties), [Queries](starship-technical-background.md#13-computed-properties-queries)
+📖 Nachlesen: [Abschnitte einer Klasse](starship-technical-background.md#9-abschnitte-einer-klasse), [Properties](starship-technical-background.md#12-properties), [Auto Properties](starship-technical-background.md#25-auto-properties), [Queries](starship-technical-background.md#13-computed-properties-queries)
 
 ```csharp
 public abstract class BaseEntity : IEquatable<BaseEntity>
@@ -340,13 +340,13 @@ public abstract class BaseEntity : IEquatable<BaseEntity>
 ```
 
 - Zwei Entities sind gleich, wenn sie denselben Typ und dieselbe `Id` haben. Das braucht die Station, wenn sie prüft, ob ein Schiff schon an einem Pylon hängt.
-- 📖 Nachlesen: [Equality](starship-technical-background.md#26-equality), [Equality: Operator Overloading](starship-technical-background.md#27-equality-operator-overloading)
+- 📖 Nachlesen: [Equality](starship-technical-background.md#27-equality), [Equality: Operator Overloading](starship-technical-background.md#28-equality-operator-overloading)
 
 #### Logbook
 
 Das Logbuch einer Entity, nur hinten anhängen, nie löschen.
 
-📖 Nachlesen: [Backing Fields](starship-technical-background.md#11-backing-fields), [Beziehungen: Richtung und Anzahl](starship-technical-background.md#21-beziehungen-richtung-und-anzahl), [List](starship-technical-background.md#36-list)
+📖 Nachlesen: [Backing Fields](starship-technical-background.md#11-backing-fields), [Beziehungen: is a und has a](starship-technical-background.md#21-beziehungen-is-a-und-has-a), [Beziehungen: Richtung und Anzahl](starship-technical-background.md#22-beziehungen-richtung-und-anzahl), [List](starship-technical-background.md#37-list)
 
 ```csharp
 public class Logbook
@@ -411,7 +411,7 @@ public class Logbook
 
 Die gemeinsame Basis aller Schiffe. Warpkern, Crew, Notruf, Station.
 
-📖 Nachlesen: [Constants](starship-technical-background.md#10-constants), [Invariants](starship-technical-background.md#15-invariants), [Dictionary](starship-technical-background.md#38-dictionary)
+📖 Nachlesen: [Constants](starship-technical-background.md#10-constants), [Invariants](starship-technical-background.md#15-invariants), [Dictionary](starship-technical-background.md#39-dictionary)
 
 ```csharp
 public abstract class BaseShip : BaseEntity
@@ -478,6 +478,8 @@ public abstract class BaseShip : BaseEntity
 #### CargoShip und RescueShip
 
 Der Frachter mit Ladung, zum Beispiel die Xhosa, und das Rettungsschiff mit Medic an Bord, die Rio Grande.
+
+📖 Nachlesen: [Beziehungen: is a und has a](starship-technical-background.md#21-beziehungen-is-a-und-has-a), [virtual, override und base](starship-technical-background.md#33-virtual-override-und-base)
 
 ```csharp
 public class CargoShip : BaseShip
@@ -604,7 +606,7 @@ Dieselbe Person darf nicht zweimal im Pool stehen, und jede Aufnahme landet im L
 
 Diese Methode ist das Muster für alle anderen. Sie zeigt die vier Schritte einer Businessmethode, deshalb steht sie hier mit Lösung.
 
-📖 Nachlesen: [Business Methods](starship-technical-background.md#16-business-methods), [Guards und Rules](starship-technical-background.md#18-business-methods-guards-und-rules), [List](starship-technical-background.md#36-list)
+📖 Nachlesen: [Business Methods](starship-technical-background.md#16-business-methods), [Guards und Rules](starship-technical-background.md#18-business-methods-guards-und-rules), [List](starship-technical-background.md#37-list)
 
 ```csharp
     /// <summary>Adds a crew member to the crew pool of the station.</summary>
@@ -633,7 +635,7 @@ Diese Methode ist das Muster für alle anderen. Sie zeigt die vier Schritte eine
 
 Legt in `StarShip.Tests` die Datei `SpaceStationTests.cs` an. Jeder Test heißt nach dem Muster `Sut_Should_When` und hat drei Teile: Given, When, Then.
 
-📖 Nachlesen: [Tests](starship-technical-background.md#23-tests)
+📖 Nachlesen: [Tests](starship-technical-background.md#24-tests)
 
 ```csharp
 using StarShip.Domain.Exceptions;
@@ -713,7 +715,7 @@ public void Supply(int amount)
 **Aufgabe:** Statt `new CrewMember("Kira", CrewRole.Captain)` soll es `CrewMember.Captain("Kira")` geben, für jede der vier Rollen
 eine statische Methode, die ein neues `CrewMember` mit fester Rolle liefert. Der Guard im Konstruktor gilt weiter, die Factory wählt nur die Rolle.
 
-📖 Nachlesen: [Factory Method](starship-technical-background.md#35-factory-method)
+📖 Nachlesen: [Factory Method](starship-technical-background.md#36-factory-method)
 
 Die erste Factory Method als Lösung, die drei anderen sehen genauso aus:
 
@@ -740,7 +742,7 @@ public static CrewMember Medic(string name)
 und beide müssen immer zusammenpassen. Deshalb setzt die Station beide Seiten in einer Methode und in fester Reihenfolge,
 das Schiff macht in 1.6 nur seinen Teil.
 
-📖 Nachlesen: [Beziehungen pflegen](starship-technical-background.md#22-beziehungen-pflegen-der-parent-setzt-beide-seiten)
+📖 Nachlesen: [Beziehungen pflegen](starship-technical-background.md#23-beziehungen-pflegen-der-parent-setzt-beide-seiten)
 
 ```csharp
 public void Dock(BaseShip ship)
@@ -875,7 +877,7 @@ public record RoleCount(CrewRole Role, int Count)
 **Aufgabe:** Ein Schiff weiß über sich, ob die Pflichtrollen komplett sind, welche fehlen, wo es ist (`Status`) und ob es starten darf (`Readiness`).
 Alles sind Queries über `Crew`, `Station`, `Distress` und `Fuel`, nichts davon wird gespeichert.
 
-📖 Nachlesen: [Pattern Matching](starship-technical-background.md#29-pattern-matching), [Von if zur Switch Expression](starship-technical-background.md#30-von-if-zur-switch-expression), [Dictionary](starship-technical-background.md#38-dictionary), [HashSet](starship-technical-background.md#37-hashset)
+📖 Nachlesen: [Pattern Matching](starship-technical-background.md#30-pattern-matching), [Von if zur Switch Expression](starship-technical-background.md#31-von-if-zur-switch-expression), [Dictionary](starship-technical-background.md#39-dictionary), [HashSet](starship-technical-background.md#38-hashset)
 
 `HasRequiredRoles` ist die erste Query, bei der ein Operator in einem anderen steckt. Der Anfang als Teaser:
 
@@ -930,7 +932,7 @@ public Readiness Readiness => ...
 **Aufgabe:** Eine Koordinate schreibt sich als `(X,Y) Lichtjahre`, ohne Leerzeichen nach dem Komma. Der Compiler hat für den Record
 schon ein `ToString` erzeugt, das `Coordinate { X = 100, Y = 200 }` ausgibt, deshalb überschreiben wir es.
 
-📖 Nachlesen: [Strings](starship-technical-background.md#34-strings)
+📖 Nachlesen: [Strings](starship-technical-background.md#35-strings)
 
 ```csharp
     /// <summary>Formats the coordinate as (X,Y) Lichtjahre.</summary>
@@ -1229,7 +1231,7 @@ public void Unload(int tons)
 `Station` ist `SpaceStation?`, deshalb holt ihr sie ohne `!` mit einer Throw Expression: `var station = Station ?? throw new StarshipException(...)`.
 Die Meldung bei fehlender Crew nennt die fehlenden Rollen aus `MissingRoles`.
 
-📖 Nachlesen: [Nullable](starship-technical-background.md#33-nullable)
+📖 Nachlesen: [Nullable](starship-technical-background.md#34-nullable)
 
 ```csharp
 public void Launch()
@@ -1308,7 +1310,7 @@ im Ordner `Queries` und hängen an `IEnumerable<BaseShip>`. Wer sie aufruft, gib
 allen drei Schiffen, egal ob angedockt oder im All, oder `ds9.Ships`, dann nur die angedockten. Ergebnisse mit mehreren Werten je Zeile sind
 Positional Records im Ordner `Queries`.
 
-📖 Nachlesen: [Extension Methods](starship-technical-background.md#31-extension-methods), [Records](starship-technical-background.md#25-records)
+📖 Nachlesen: [Extension Methods](starship-technical-background.md#32-extension-methods), [Records](starship-technical-background.md#26-records)
 
 Die erste als Lösung. Legt im Ordner `Queries` die Datei `ShipQueries.cs` an, eine statische Klasse, die Methode mit `this` vor dem Parameter:
 
@@ -1382,7 +1384,7 @@ public static IReadOnlyList<FuelByType> TotalFuelByType(this IEnumerable<BaseShi
 
 **Aufgabe:** Der Frachter hängt an den Report des Schiffs eine Zeile `Cargo` an. Er ruft `base.Report()` auf und ergänzt, statt alles neu zu schreiben.
 
-📖 Nachlesen: [virtual, override und base](starship-technical-background.md#32-virtual-override-und-base)
+📖 Nachlesen: [virtual, override und base](starship-technical-background.md#33-virtual-override-und-base)
 
 ```csharp
 public override string Report()
@@ -1474,7 +1476,7 @@ Xhosa (CargoShip)
 ein Schiff hat genau einen oder keinen, deshalb ist `Distress` nullable. `Status` liefert ab jetzt `Distress`, ohne dass jemand ihn setzt.
 Mit `?.` lest ihr den Grund, ohne vorher auf `null` zu prüfen: `xhosa.Distress?.Reason`.
 
-📖 Nachlesen: [Entity und Value Object](starship-technical-background.md#20-entity-und-value-object), [Nullable](starship-technical-background.md#33-nullable)
+📖 Nachlesen: [Entity und Value Object](starship-technical-background.md#20-entity-und-value-object), [Nullable](starship-technical-background.md#34-nullable)
 
 ```csharp
 public void SendDistressSignal(string reason)
@@ -1545,7 +1547,7 @@ public static IReadOnlyList<DistressReport> DistressReports(this IEnumerable<Bas
 **Aufgabe:** Eine lokale Methode in `Program.cs`, keine Domäne: Die Domäne liefert den Zustand, die Beschreibung dafür gehört in die App.
 Eine Switch Expression über das Schiff mit Typ-Patterns (`CargoShip c`) und Property-Patterns (`{ IsFull: true }`), die erste passende Zeile gewinnt.
 
-📖 Nachlesen: [Pattern Matching](starship-technical-background.md#29-pattern-matching)
+📖 Nachlesen: [Pattern Matching](starship-technical-background.md#30-pattern-matching)
 
 ```csharp
 static string Describe(BaseShip ship)
@@ -1684,7 +1686,7 @@ public static IReadOnlyList<BaseShip> WithinRange(this IEnumerable<BaseShip> shi
 **Aufgabe:** Jedes Schiff sieht `SensorRange` Lichtjahre weit. `Scan` liefert alle anderen Schiffe in dieser Reichweite, das nächste zuerst,
 das eigene Schiff nicht. `Scan` ist `virtual`, weil das Rettungsschiff in 4.5 anders scannt. Ein Wert ist für alle gleich (`const`), ein Verhalten darf sich je Typ unterscheiden (`virtual`).
 
-📖 Nachlesen: [virtual, override und base](starship-technical-background.md#32-virtual-override-und-base)
+📖 Nachlesen: [virtual, override und base](starship-technical-background.md#33-virtual-override-und-base)
 
 ```csharp
 public bool IsInSensorRange(BaseShip other)
@@ -1876,7 +1878,7 @@ public IReadOnlyList<TypeCount> ShipCountByType()
 **Aufgabe:** `Format` macht aus einem Eintrag eine Zeile in drei Spalten: Typ in eckigen Klammern, Verfasser, Nachricht. Ein Notruf bekommt
 das Label `[!!]` statt `[Distress]`. `Report` fügt alle Einträge mit `Format` zu einem Block zusammen, eine Zeile pro Eintrag.
 
-📖 Nachlesen: [Strings](starship-technical-background.md#34-strings)
+📖 Nachlesen: [Strings](starship-technical-background.md#35-strings)
 
 ```csharp
 public string Format(LogEntry entry)
