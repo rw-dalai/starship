@@ -346,7 +346,7 @@ public abstract class BaseEntity : IEquatable<BaseEntity>
 
 Das Logbuch einer Entity, nur hinten anhängen, nie löschen.
 
-📖 Nachlesen: [Backing Fields](starship-technical-background.md#11-backing-fields), [Beziehungen: Richtung und Anzahl](starship-technical-background.md#21-beziehungen-richtung-und-anzahl)
+📖 Nachlesen: [Backing Fields](starship-technical-background.md#11-backing-fields), [Beziehungen: Richtung und Anzahl](starship-technical-background.md#21-beziehungen-richtung-und-anzahl), [List](starship-technical-background.md#36-list)
 
 ```csharp
 public class Logbook
@@ -411,7 +411,7 @@ public class Logbook
 
 Die gemeinsame Basis aller Schiffe. Warpkern, Crew, Notruf, Station.
 
-📖 Nachlesen: [Constants](starship-technical-background.md#10-constants), [Invariants](starship-technical-background.md#15-invariants)
+📖 Nachlesen: [Constants](starship-technical-background.md#10-constants), [Invariants](starship-technical-background.md#15-invariants), [Dictionary](starship-technical-background.md#38-dictionary)
 
 ```csharp
 public abstract class BaseShip : BaseEntity
@@ -604,7 +604,7 @@ Dieselbe Person darf nicht zweimal im Pool stehen, und jede Aufnahme landet im L
 
 Diese Methode ist das Muster für alle anderen. Sie zeigt die vier Schritte einer Businessmethode, deshalb steht sie hier mit Lösung.
 
-📖 Nachlesen: [Business Methods](starship-technical-background.md#16-business-methods), [Guards und Rules](starship-technical-background.md#18-business-methods-guards-und-rules)
+📖 Nachlesen: [Business Methods](starship-technical-background.md#16-business-methods), [Guards und Rules](starship-technical-background.md#18-business-methods-guards-und-rules), [List](starship-technical-background.md#36-list)
 
 ```csharp
     /// <summary>Adds a crew member to the crew pool of the station.</summary>
@@ -875,7 +875,7 @@ public record RoleCount(CrewRole Role, int Count)
 **Aufgabe:** Ein Schiff weiß über sich, ob die Pflichtrollen komplett sind, welche fehlen, wo es ist (`Status`) und ob es starten darf (`Readiness`).
 Alles sind Queries über `Crew`, `Station`, `Distress` und `Fuel`, nichts davon wird gespeichert.
 
-📖 Nachlesen: [Pattern Matching](starship-technical-background.md#29-pattern-matching), [Von if zur Switch Expression](starship-technical-background.md#30-von-if-zur-switch-expression)
+📖 Nachlesen: [Pattern Matching](starship-technical-background.md#29-pattern-matching), [Von if zur Switch Expression](starship-technical-background.md#30-von-if-zur-switch-expression), [Dictionary](starship-technical-background.md#38-dictionary), [HashSet](starship-technical-background.md#37-hashset)
 
 `HasRequiredRoles` ist die erste Query, bei der ein Operator in einem anderen steckt. Der Anfang als Teaser:
 

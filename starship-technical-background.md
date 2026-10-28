@@ -851,3 +851,124 @@ var nog  = CrewMember.Pilot("Nog");
 - **static**: die Methode gehört zum Typ, nicht zu einem Objekt. Man ruft sie über den Typnamen auf, es gibt ja noch kein Objekt.
 - **new(...)**: der Typ steht schon links im Rückgabetyp, deshalb darf er beim `new` wegbleiben (target-typed new).
 - **Konstruktor bleibt**: die Factory ruft ihn auf, der Guard im Konstruktor gilt weiter. Die Factory wählt nur die Rolle.
+
+---
+
+# Teil E: Collections
+
+Drei Datenstrukturen, drei Begriffe aus der Mathematik.
+
+## 36. List
+
+<img src="_assets/technical_list.png" alt="List" width="640" style="margin-left: 100px; margin-top: 16px">
+ 
+Eine `List` ist ein Tupel mit variabler Länge. Das C# Tupel `(int, string)` ist die Variante mit fester Länge.
+
+- **Reihenfolge**: die Einfügereihenfolge bleibt, `foreach` liefert sie genau so.
+- **Duplikate**: dieselbe Person darf zweimal drin sein, wenn die Business Rule es nicht verbietet.
+- **Index**: Zugriff per Position, `crew[0]` ist der Erste.
+
+**Creation**
+
+```csharp
+private readonly List<CrewMember> _crew = [];                    // innen List
+public IReadOnlyList<CrewMember> Crew => _crew.AsReadOnly();     // nach außen nur lesen
+```
+
+**Operation**
+
+```csharp
+_crew.Add(member);                   // hinten anhängen
+_crew.Remove(member);                // erstes Vorkommen entfernen, false wenn nicht drin
+_crew.Contains(member);              // ist drin? fragt Equals
+_crew[0];                            // Zugriff per Index
+_crew.Count;                         // Anzahl
+```
+
+**Iteration**
+
+```csharp
+foreach (var member in _crew)        // in Einfügereihenfolge
+    Console.WriteLine(member);
+_crew.Where(c => c.Role == CrewRole.Pilot).ToList();   // LINQ liefert wieder eine List
+```
+
+## 37. HashSet
+
+<img src="_assets/technical_hashset.png" alt="HashSet" width="640" style="margin-left: 100px; margin-top: 16px">
+
+Ein `HashSet` ist eine Menge: {a, b} ist dasselbe wie {b, a}, und {a, a} ist nur {a}.
+
+- **Keine Duplikate**: `Add` eines Elements, das schon drin ist, ändert nichts und gibt `false` zurück.
+- **Keine Reihenfolge**: `foreach` liefert die Elemente, aber in keiner garantierten Ordnung.
+- **Mengenoperationen**: Vereinigung, Schnitt, Differenz, Teilmenge, wie in der Mathe.
+
+**Creation**
+
+```csharp
+var required = new HashSet<CrewRole> { CrewRole.Captain, CrewRole.Pilot, CrewRole.Medic };
+var onBoard = Crew.Select(c => c.Role).ToHashSet();    // LINQ macht aus jeder Sequenz ein HashSet
+```
+
+<img src="_assets/technical_set_operations.png" alt="Mengenoperationen" width="800" style="margin-left: 100px; margin-top: 16px">
+
+**Operation**
+
+```csharp
+onBoard.Add(CrewRole.Pilot);         // true beim ersten Mal, false beim zweiten
+onBoard.Contains(CrewRole.Medic);    // ist drin?
+onBoard.Remove(CrewRole.Pilot);
+
+required.ExceptWith(onBoard);        // Differenz: was fehlt noch
+required.IntersectWith(onBoard);     // Schnitt: was ist schon besetzt
+required.UnionWith(onBoard);         // Vereinigung: alles zusammen
+onBoard.IsSubsetOf(required);        // Teilmenge: nur erlaubte Rollen an Bord?
+```
+
+**Iteration**
+
+```csharp
+foreach (var role in required)       // in keiner garantierten Reihenfolge
+    Console.WriteLine(role);
+required.Order().ToList();           // sortiert, wenn die Ausgabe stabil sein soll
+```
+
+Nach außen `IReadOnlySet<CrewRole>`, dann kann niemand die Menge von außen verändern.
+
+## 38. Dictionary
+
+<img src="_assets/technical_dictionary.png" alt="Dictionary" width="420" style="margin-left: 100px; margin-top: 16px">
+
+Ein `Dictionary` ist eine Funktion: jedem Schlüssel genau ein Wert, wie f jedem x genau ein y zuordnet. `RequiredRoles` bildet Rolle auf Anzahl ab.
+
+- **Jeder Schlüssel einmal**: ein zweites `[Captain] = 3` überschreibt den alten Wert, es gibt keinen zweiten Eintrag.
+- **Genau ein Wert**: `dict[key]` liefert ihn, oder wirft, wenn der Schlüssel fehlt.
+- **Elemente sind Paare**: beim Durchlaufen ist jedes Element ein `KeyValuePair` mit `.Key` und `.Value`.
+
+**Creation**
+
+```csharp
+private static readonly IReadOnlyDictionary<CrewRole, int> Roles =            // Schlüssel in eckigen Klammern
+    new Dictionary<CrewRole, int> { [CrewRole.Captain] = 1, [CrewRole.Pilot] = 2, [CrewRole.Medic] = 5 };
+```
+
+**Operation**
+
+```csharp
+Roles[CrewRole.Pilot];                       // 2, wirft KeyNotFoundException bei fremdem Schlüssel
+Roles.GetValueOrDefault(CrewRole.Engineer);  // 0, wenn der Schlüssel fehlt
+Roles.ContainsKey(CrewRole.Medic);           // true
+```
+
+**Iteration**
+
+```csharp
+foreach (var r in Roles)                     // jedes Element ist ein KeyValuePair
+    Console.WriteLine($"{r.Key}: {r.Value}");
+
+foreach (var (role, count) in Roles)         // dasselbe, das Paar zerlegt
+    Console.WriteLine($"{role}: {count}");
+
+Roles.Sum(r => r.Value);                     // 8 Sitze insgesamt
+Roles.All(r => r.Value > 0);                 // jede Rolle mindestens einmal
+```
