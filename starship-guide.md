@@ -452,7 +452,7 @@ public abstract class BaseShip : BaseEntity
 - `Fuel` ist die Antimaterie im Warpkern, zwischen 0 und `MaxFuel`. Ein neues Schiff startet leer.
 - `Distress` ist der aktuelle Notruf. Kein Notruf heißt `null`.
 - `Station` ist die Station, an der das Schiff hängt. Im All ist sie `null`.
-- `Crew` ist die Sicht auf die Besatzung, nur zum Lesen. `CrewCount` zählt sie, `IsDocked` sagt, ob das Schiff an einer Station hängt. Weitere Queries wie `Status` kommen in Akt 1.
+- `Crew` ist die Sicht auf die Besatzung, nur zum Lesen. `CrewCount` zählt die Crew an Bord. Den Namen gibt es auch in der `SpaceStation`, dort zählt er den Pool: jede Klasse zählt ihre eigene Liste. `IsDocked` sagt, ob das Schiff an einer Station hängt. Weitere Queries wie `Status` kommen in Akt 1.
 
 > 💡 `Fuel` steht im Code für Antimaterie, weil es kürzer ist und in jeden Namen passt.
 
@@ -553,12 +553,13 @@ public class SpaceStation : BaseEntity
 
     public IReadOnlyList<BaseShip> Ships => _ships.AsReadOnly();
     public IReadOnlyList<CrewMember> CrewPool => _crewPool.AsReadOnly();
+    public int CrewCount => _crewPool.Count;
 ```
 
 - `MaxDocks`: zehn Schiffe können gleichzeitig an der Station hängen.
 - `FuelPool` ist der Antimaterie-Vorrat. Er startet bei 0, der Tanker in Akt 1 füllt ihn.
 - `_ships` und `_crewPool` sind die privaten Listen: die angedockten Schiffe und die Leute, die auf ein Schiff warten. Beide füllen sich erst in Akt 1.
-- `Ships` und `CrewPool` sind die Sichten nach außen, nur zum Lesen.
+- `Ships` und `CrewPool` sind die Sichten nach außen, nur zum Lesen. `CrewCount` zählt den Pool. Den Namen gibt es auch im `BaseShip`, dort zählt er die Crew an Bord: jede Klasse zählt ihre eigene Liste.
 
 ```csharp
     // --- Ctor ---
