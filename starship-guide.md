@@ -734,14 +734,33 @@ public static CrewMember Medic(string name)
 
 * **Test:** `Pilot_ShouldHaveRolePilot_WhenCreated`
 
-#### 1.5 SpaceStation: Dock und Undock
+#### 1.5 BaseShip: AttachTo und Detach
+
+> *Das Schiff merkt sich seinen Pylon. Aber nur die Station darf sagen, wann.*
+
+**Aufgabe:** Das Schiff setzt oder löscht seine `Station`. Beide Methoden sind public, aber durch eine Regel geschützt:
+`AttachTo` verlangt, dass die Station das Schiff schon in ihrer Liste hat, `Detach`, dass sie es nicht mehr hat.
+Wer sie direkt aufruft, scheitert an der Regel, nicht an der Sichtbarkeit. Nur `Dock` und `Undock` in 1.6 kennen die richtige Reihenfolge.
+
+```csharp
+public void AttachTo(SpaceStation station)
+public void Detach()
+```
+* **Guard:** `station` nicht `null`
+* **Regeln:** `AttachTo`: noch nicht angedockt, und `station.Ships` enthält das Schiff. `Detach`: angedockt, und `Station.Ships` enthält das Schiff nicht mehr
+* **Logik:** `Station` wird gesetzt beziehungsweise auf `null` gesetzt
+* **Log:** `LogType.Docking`, „An Deep Space 9 angedockt" und „Von Deep Space 9 abgedockt"
+
+* **Test:** `AttachTo_ShouldThrow_WhenStationDoesNotListTheShip`
+
+#### 1.6 SpaceStation: Dock und Undock
 
 > *Die Xhosa erreicht als erstes Schiff den oberen Pylon, und mit einem dumpfen Schlag schließen sich die Andockklammern.*
 > *Ab jetzt kennt die Station das Schiff, und das Schiff kennt seine Station, sonst gibt es Chaos im Dock.*
 
 **Aufgabe:** Die Station nimmt ein Schiff an einen Pylon. Die Beziehung hat zwei Seiten, die Liste der Station und die `Station` am Schiff,
 und beide müssen immer zusammenpassen. Deshalb setzt die Station beide Seiten in einer Methode und in fester Reihenfolge,
-das Schiff macht in 1.6 nur seinen Teil.
+das Schiff hat in 1.5 nur seinen Teil gemacht.
 
 📖 Nachlesen: [Beziehungen pflegen](starship-technical-background.md#23-beziehungen-pflegen-der-parent-setzt-beide-seiten)
 
@@ -763,25 +782,6 @@ public void Undock(BaseShip ship)
 
 * **Test:** `Dock_ShouldSetBothSides_WhenShipIsInSpace`, prüft `Ships` und `ship.Station`
 * **Test:** `Dock_ShouldThrow_WhenShipIsAlreadyDocked`
-
-#### 1.6 BaseShip: AttachTo und Detach
-
-> *Das Schiff merkt sich seinen Pylon. Aber nur die Station darf sagen, wann.*
-
-**Aufgabe:** Das Schiff setzt oder löscht seine `Station`. Beide Methoden sind public, aber durch eine Regel geschützt:
-`AttachTo` verlangt, dass die Station das Schiff schon in ihrer Liste hat, `Detach`, dass sie es nicht mehr hat.
-Wer sie direkt aufruft, scheitert an der Regel, nicht an der Sichtbarkeit. Nur `Dock` und `Undock` kennen die richtige Reihenfolge.
-
-```csharp
-public void AttachTo(SpaceStation station)
-public void Detach()
-```
-* **Guard:** `station` nicht `null`
-* **Regeln:** `AttachTo`: noch nicht angedockt, und `station.Ships` enthält das Schiff. `Detach`: angedockt, und `Station.Ships` enthält das Schiff nicht mehr
-* **Logik:** `Station` wird gesetzt beziehungsweise auf `null` gesetzt
-* **Log:** `LogType.Docking`, „An Deep Space 9 angedockt" und „Von Deep Space 9 abgedockt"
-
-* **Test:** `AttachTo_ShouldThrow_WhenStationDoesNotListTheShip`
 
 #### 1.7 BaseShip: AddFuel
 
@@ -922,7 +922,9 @@ public Readiness Readiness => ...
 
 * **Test:** `Status_ShouldBeInSpace_WhenShipHasNoStation`
 * **Test:** `Readiness_ShouldBeNeedsCrew_WhenCaptainIsMissing`
-* **Test:** `MissingRoles_ShouldReturnPilot_WhenOnlyCaptainIsOnBoard`
+* **Test:** `MissingRoles_ShouldReturnCaptainAndPilot_WhenShipHasNoCrew`
+
+> 💡 In Akt 1 kommt noch niemand an Bord, `Board` gibt es erst in 2.3. Testet die Queries deshalb mit leerer Crew. Den Fall „nur Kira an Bord“ testet ihr in 2.3 nach.
 
 ### Ausgabe und Program.cs
 
