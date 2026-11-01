@@ -1661,9 +1661,9 @@ public bool CanRescue(BaseShip target, SpaceStation home)
 public void Rescue(BaseShip target, SpaceStation home)
 ```
 * **Guard:** `target` und `home` nicht `null`
-* **Regeln,** in dieser Reihenfolge: Ziel hat Status `Distress`, gleiche Position wie das Ziel, `HasRequiredRoles` (also auch der Medic), Platz für alle (`CrewCount + target.CrewCount` höchstens `MaxCrew`), Antimaterie reicht bis `home`
-* **Logik:** jede Person der Ziel-Crew über `target.Unboard` und das eigene `Board` übernehmen, dann `Logbook.Append(target.Logbook)`, dann `target.ClearDistressSignal()`
-* **Log:** `LogType.Rescue`, „Crew von Xhosa übernommen (2 Personen), Notruf von 14:03:21 beantwortet", die Zeit aus `target.Distress.SentAt`
+* **Regeln,** in dieser Reihenfolge: Ziel hat Status `Distress`, gleiche Position wie das Ziel, `HasRequiredRoles` (also auch der Medic), Platz für alle (`CrewCount + target.CrewCount` höchstens `MaxCrew`), Antimaterie reicht von hier zurück bis `home` (`HasEnoughFuelTo`, nur der Rückweg)
+* **Logik:** das Signal vor dem Löschen merken, dann jede Person der Ziel-Crew über `target.Unboard` und das eigene `Board` übernehmen, dann `Logbook.Append(target.Logbook)`, dann `target.ClearDistressSignal()`
+* **Log:** `LogType.Rescue`, „Crew von Xhosa übernommen (2 Personen), Notruf von 14:03:21 beantwortet", die Zeit aus dem gemerkten Signal
 
 * **Test:** `Rescue_ShouldTakeOverCrewAndClearSignal_WhenAllRulesHold`
 * **Test:** `Rescue_ShouldThrow_WhenShipsAreNotAtTheSamePosition`, prüft auch, dass niemand das Schiff gewechselt hat
